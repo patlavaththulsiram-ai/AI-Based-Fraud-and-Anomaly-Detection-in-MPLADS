@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% set active_page = "landing" %}
+
+{% block title %}MPLADS AI - Algorithmic Audit & Fraud-Risk Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Hero Section -->
+  <div class="row align-items-center mb-5 py-4 px-3 rounded-4 bg-white border shadow-sm">
+    <div class="col-lg-8">
+      <div class="d-inline-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+          <i class="bi bi-shield-check me-1"></i> AI-Powered Public Expenditure Sentinel
+        </span>
+        <span class="prototype-tag">B.Tech CSE Data Science Prototype</span>
+      </div>
+      <h1 class="display-6 fw-bold text-navy mb-3" style="color: #0F172A; letter-spacing: -0.02em;">
+        Data Anomaly and Fraud Risk Detection System for MPLADS Works
+      </h1>
+      <p class="lead text-secondary mb-4" style="font-size: 1.05rem; line-height: 1.6;">
+        An explainable computational auditing framework evaluating ₹ Crores in constituency development outlays.
+        Ingests project records, validates semantic integrity, screens duplicate tenders with NLP, detects anomalous disbursals using ensemble machine learning, and produces transparent 0–100 risk indicators.
+      </p>
+      
+      <div class="d-flex flex-wrap gap-3">
+        <a href="{{ url_for('views.dashboard') }}" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+          <i class="bi bi-speedometer2 me-2"></i> Launch Audit Dashboard
+        </a>
+        <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-outline-primary px-4 py-2 fw-semibold">
+          <i class="bi bi-play-circle me-2"></i> Load Demo Dataset (5,000 Records)
+        </a>
+        <a href="{{ url_for('views.upload') }}" class="btn btn-light border px-4 py-2 fw-semibold text-secondary">
+          <i class="bi bi-cloud-arrow-up me-2"></i> Ingest Portal Export
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-4 text-center mt-4 mt-lg-0">
+      <div class="p-4 rounded-4 bg-light border text-center">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Audit Shield" width="110" height="110" class="mb-3">
+        <h5 class="fw-bold text-dark mb-1">MPLADS AI Sentinel</h5>
+        <div class="text-muted small mb-3">Multi-Tier Algorithmic Oversight</div>
+        <div class="d-flex justify-content-center gap-2">
+          <span class="badge bg-success-subtle text-success border">12 States</span>
+          <span class="badge bg-info-subtle text-info border">3 ML Models</span>
+          <span class="badge bg-warning-subtle text-warning-emphasis border">8 Policy Rules</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Four Core Feature Tiles (Mockup Requirement) -->
+  <div class="row g-4 mb-5">
+    <!-- Tile 1 -->
+    <div class="col-md-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #2563EB !important;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="kpi-icon-box bg-primary-subtle text-primary">
+            <i class="bi bi-database-check"></i>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-bold">Module 01</span>
+            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Data Ingestion & Quality</h5>
+          </div>
+        </div>
+        <p class="card-text text-secondary small mb-3">
+          Ingests real and synthetic CSV, XLSX, and JSON records. Normalizes state naming, imputes missing attributes, quarantines corrupt records, and computes a 0–100 Data Quality Score.
+        </p>
+        <a href="{{ url_for('views.quality_view') }}" class="btn btn-sm btn-link text-primary text-decoration-none p-0 mt-auto fw-semibold">
+          Explore Quality Engine <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Tile 2 -->
+    <div class="col-md-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #06B6D4 !important;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="kpi-icon-box bg-info-subtle text-info">
+            <i class="bi bi-cpu"></i>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-bold">Module 02</span>
+            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Multi-Model ML Suite</h5>
+          </div>
+        </div>
+        <p class="card-text text-secondary small mb-3">
+          Combines unsupervised Isolation Forest and One-Class SVM with a supervised Random Forest classifier. Evaluates Precision, Recall, and F1 across an 80/20 holdout test split.
+        </p>
+        <a href="{{ url_for('views.ml_detection') }}" class="btn btn-sm btn-link text-info text-decoration-none p-0 mt-auto fw-semibold">
+          View ML Benchmarks <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Tile 3 -->
+    <div class="col-md-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #F59E0B !important;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
+            <i class="bi bi-shield-slash"></i>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-bold">Module 03</span>
+            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Explainable Risk Scoring</h5>
+          </div>
+        </div>
+        <p class="card-text text-secondary small mb-3">
+          Synthesizes continuous 0–100 Risk Scores bucketed into Low, Medium, High, and Critical. Generates transparent, plain-language root cause explanations for every flagged project.
+        </p>
+        <a href="{{ url_for('views.risk_list') }}" class="btn btn-sm btn-link text-warning-emphasis text-decoration-none p-0 mt-auto fw-semibold">
+          Inspect Risk Register <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Tile 4 -->
+    <div class="col-md-6 col-xl-3">
+      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #10B981 !important;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="kpi-icon-box bg-success-subtle text-success">
+            <i class="bi bi-pie-chart"></i>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-bold">Module 04</span>
+            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Power BI & PDF Audit</h5>
+          </div>
+        </div>
+        <p class="card-text text-secondary small mb-3">
+          Exports standardized UTF-8 CSV datasets for direct Power BI Desktop ingestion, embeds live analytical dashboards, and compiles comprehensive PDF audit dossiers via ReportLab.
+        </p>
+        <a href="{{ url_for('views.powerbi_view') }}" class="btn btn-sm btn-link text-success text-decoration-none p-0 mt-auto fw-semibold">
+          View BI & Reports <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation Pipeline Architecture Diagram -->
+  <div class="card border shadow-sm p-4 bg-white mb-4">
+    <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-diagram-3 me-2 text-primary"></i> End-to-End System Audit Pipeline</h5>
+    <div class="row g-3 text-center">
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-file-earmark-spreadsheet fs-3 text-primary mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">1. Ingestion</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">CSV / XLSX / JSON</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-filter-square fs-3 text-info mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">2. Cleaning</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">Imputation & Quality</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-calculator fs-3 text-success mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">3. Features</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">Gaps & Overruns</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-cpu fs-3 text-warning mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">4. ML & Rules</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">IF + SVM + RF</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-speedometer fs-3 text-danger mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">5. Risk Score</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">0-100 Composite</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 rounded-3 bg-light border">
+          <i class="bi bi-bar-chart-line fs-3 text-primary mb-2"></i>
+          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">6. Power BI</h6>
+          <small class="text-muted" style="font-size: 0.72rem;">CSV & PDF Reports</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

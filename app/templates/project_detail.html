@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% set active_page = "risk" %}
+
+{% block title %}Investigation Dossier: {{ p.work_id }} - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom flex-wrap gap-2">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{{ url_for('views.risk_list') }}" class="btn btn-sm btn-outline-secondary py-0 px-2"><i class="bi bi-arrow-left"></i> Risk Register</a>
+        <h3 class="fw-bold text-dark mb-0">Project Investigation Dossier</h3>
+        <span class="badge bg-dark">{{ p.work_id }}</span>
+      </div>
+      <p class="text-muted small mb-0">{{ p.work_description }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-danger fw-semibold">
+        <i class="bi bi-shield-alert me-1"></i> View 0-100 Risk Breakdown
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Left Column: Core Administrative & Financial Dossier -->
+    <div class="col-lg-8">
+      <!-- Administrative Summary Card -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-building text-primary me-2"></i> Administrative & Parliamentary Details</h5>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <span class="text-muted small">Hon'ble Member of Parliament</span>
+            <div class="fw-bold text-dark">{{ p.mp_name }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Constituency & State</span>
+            <div class="fw-bold text-dark">{{ p.constituency }}, {{ p.state }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">District Administrative Nodal Body</span>
+            <div class="fw-bold text-dark">{{ p.district }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Implementing / Executing Agency</span>
+            <div class="fw-bold text-dark">{{ p.implementing_agency }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Infrastructure Sector</span>
+            <div><span class="badge bg-light text-dark border">{{ p.work_category }}</span></div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Current Operational Status</span>
+            <div>
+              <span class="badge badge-status-{{ p.status | lower }}">{{ p.status }}</span>
+              <span class="badge bg-light text-secondary border ms-1">{{ p.progress_percent }}% Physical Progress</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Reconciliation Card -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-cash-stack text-success me-2"></i> Financial Audit Breakdown</h5>
+        <div class="row g-3 text-center">
+          <div class="col-3">
+            <div class="p-3 border rounded-3 bg-light">
+              <span class="text-muted small">Engineering Estimate</span>
+              <div class="fw-bold fs-5 text-dark mt-1">₹{{ p.estimated_cost }}L</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-3 border rounded-3 bg-light">
+              <span class="text-muted small">Sanctioned Outlay</span>
+              <div class="fw-bold fs-5 text-primary mt-1">₹{{ p.sanctioned_amount }}L</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-3 border rounded-3 bg-light">
+              <span class="text-muted small">Authorized Released</span>
+              <div class="fw-bold fs-5 text-info mt-1">₹{{ p.authorized_amount }}L</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-3 border rounded-3 bg-light">
+              <span class="text-muted small">Incurred Spend</span>
+              <div class="fw-bold fs-5 text-danger mt-1">₹{{ p.expenditure }}L</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 p-3 rounded-3 bg-light small text-secondary">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Fund Utilization Rate:</span>
+            <span class="fw-bold text-dark">{{ ((p.expenditure / p.sanctioned_amount)*100) | round(1) if p.sanctioned_amount > 0 else 0 }}%</span>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span>Cost Overrun against Estimate:</span>
+            <span class="fw-bold text-dark">{{ (p.cost_overrun_pct * 100) | round(1) }}%</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Spend vs Progress Alignment Gap:</span>
+            <span class="fw-bold text-dark">{{ (p.progress_vs_spend_gap * 100) | round(1) }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Timeline Card -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-calendar3 text-primary me-2"></i> Timeline & Milestone Tracking</h5>
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <span class="text-muted small">Sanction Approval Date</span>
+            <div class="fw-bold text-dark">{{ p.sanction_date | default('N/A') }}</div>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small">Target Completion Date</span>
+            <div class="fw-bold text-dark">{{ p.expected_completion_date | default('N/A') }}</div>
+          </div>
+          <div class="col-sm-4">
+            <span class="text-muted small">Actual Completion Date</span>
+            <div class="fw-bold text-dark">{{ p.actual_completion_date | default('Pending') }}</div>
+          </div>
+        </div>
+        <div class="mt-3 small text-muted">
+          Accumulated Timeline Delay: <span class="badge {% if p.delay_days > 90 %}bg-danger{% else %}bg-light text-dark{% endif %} border">{{ p.delay_days }} Days</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Risk Indicators & Auditor Inspection Notes -->
+    <div class="col-lg-4">
+      <!-- Risk Status Card -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4 text-center">
+        <span class="kpi-label">Assigned Risk Tier</span>
+        <div class="my-2">
+          <span class="badge badge-risk-{{ p.risk_level | lower }} fs-5 px-4 py-2">
+            {{ p.risk_level }} ({{ p.risk_score }}/100)
+          </span>
+        </div>
+        <div class="small text-muted mb-3">Total Policy Rules Triggered: <strong>{{ p.total_rules_triggered }}</strong></div>
+        
+        <div class="text-start">
+          <h6 class="fw-bold text-dark mb-2 small text-uppercase">Active Risk Indicators:</h6>
+          <ul class="list-unstyled small text-secondary mb-0">
+            {% for reason in reasons %}
+            <li class="mb-2 d-flex align-items-start gap-1">
+              <i class="bi bi-caret-right-fill text-danger mt-1"></i>
+              <span>{{ reason }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Auditor Notes Card (Persisted in SQLite) -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text text-primary me-2"></i> Audit Inspection Notes</h5>
+        
+        <!-- Post Note Form -->
+        <form method="POST" action="{{ url_for('views.project_detail', work_id=p.work_id) }}" class="mb-3">
+          <div class="mb-2">
+            <textarea class="form-control form-control-sm" name="note_text" rows="3" placeholder="Append confidential inspection note or ground verification observation..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary w-100 fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Save Inspection Note
+          </button>
+        </form>
+
+        <!-- Chronological Notes Log -->
+        <div style="max-height: 250px; overflow-y: auto;">
+          {% for n in notes %}
+          <div class="p-2 mb-2 rounded bg-light border small">
+            <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+              <span class="fw-bold text-dark">{{ n.author_name }}</span>
+              <span>{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <p class="mb-0 text-secondary mt-1">{{ n.note_text }}</p>
+          </div>
+          {% else %}
+          <div class="text-muted small text-center py-3">
+            No inspection notes logged yet for this work.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

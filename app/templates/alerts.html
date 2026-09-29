@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% set active_page = "alerts" %}
+
+{% block title %}Operational Alert Triage Queue - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom flex-wrap gap-2">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Operational Risk & Compliance Alert Queue</h3>
+      <p class="text-muted small mb-0">Prioritized triage workflow for flagged civil works requiring administrative investigation and verification</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.download_csv', export_name='alerts') }}" class="btn btn-sm btn-outline-danger fw-semibold">
+        <i class="bi bi-download me-1"></i> Export Alerts CSV
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No operational alerts active.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Instructions Notice -->
+  <div class="alert alert-light border rounded-3 p-3 mb-4 small text-secondary d-flex align-items-center justify-content-between">
+    <div>
+      <i class="bi bi-info-circle text-primary me-2"></i>
+      <strong>Workflow Protocol:</strong> Select an alert status to change its triage lifecycle. Status transitions (<em>Open &rarr; Investigating &rarr; Resolved</em>) persist directly in the audit database.
+    </div>
+    <span class="badge bg-secondary-subtle text-secondary">{{ alerts | length }} High-Priority Works</span>
+  </div>
+
+  <!-- Operational Alerts Table -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Work ID</th>
+            <th>MP & Location</th>
+            <th>Sector</th>
+            <th>Spend (₹ Lakhs)</th>
+            <th>Severity Tier</th>
+            <th>Risk Score</th>
+            <th>Primary Risk Indicator Requiring Verification</th>
+            <th style="width: 170px;">Triage Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in alerts %}
+          <tr>
+            <td>
+              <a href="{{ url_for('views.project_detail', work_id=a.work_id) }}" class="fw-bold text-decoration-none text-primary">
+                <code>{{ a.work_id }}</code>
+              </a>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ a.mp_name }}</div>
+              <div class="text-muted small">{{ a.district }}, {{ a.state }}</div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ a.work_category }}</span>
+            </td>
+            <td>
+              <div class="fw-bold">₹{{ a.expenditure }}L</div>
+              <div class="text-muted small">Sanction: ₹{{ a.sanctioned_amount }}L</div>
+            </td>
+            <td>
+              <span class="badge badge-risk-{{ a.severity | lower }}">{{ a.severity }}</span>
+            </td>
+            <td>
+              <div class="fw-bold fs-6">{{ a.risk_score }}</div>
+            </td>
+            <td style="max-width: 320px;">
+              <div class="small text-secondary" title="{{ a.primary_reason }}">
+                {{ a.primary_reason }}
+              </div>
+            </td>
+            <td>
+              <select class="form-select form-select-sm" 
+                      data-original-status="{{ a.status }}"
+                      onchange="updateAlertStatus('{{ a.work_id }}', this.value, this)">
+                <option value="Open" {% if a.status == 'Open' %}selected{% endif %}>Open</option>
+                <option value="Investigating" {% if a.status == 'Investigating' %}selected{% endif %}>Investigating</option>
+                <option value="Resolved" {% if a.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+              </select>
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('views.risk_detail', work_id=a.work_id) }}" class="btn btn-sm btn-outline-danger py-0 px-2" title="Inspect Risk Dossier">
+                <i class="bi bi-shield-alert"></i> Dossier
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

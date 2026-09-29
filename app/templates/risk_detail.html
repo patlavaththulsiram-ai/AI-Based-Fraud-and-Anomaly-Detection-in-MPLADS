@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% set active_page = "risk" %}
+
+{% block title %}Risk Dossier: {{ p.work_id }} - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom flex-wrap gap-2">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{{ url_for('views.risk_list') }}" class="btn btn-sm btn-outline-secondary py-0 px-2"><i class="bi bi-arrow-left"></i> Back to Register</a>
+        <h3 class="fw-bold text-dark mb-0">Project Risk Dossier</h3>
+        <span class="badge bg-dark">{{ p.work_id }}</span>
+      </div>
+      <p class="text-muted small mb-0">{{ p.work_description }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.project_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-primary fw-semibold">
+        <i class="bi bi-file-text me-1"></i> Full Project Investigation
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Left Column: Gauge & Risk Tiers -->
+    <div class="col-lg-5">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white text-center h-100">
+        <span class="kpi-label">Composite Algorithmic Risk Index</span>
+        
+        <div class="my-4 position-relative d-inline-block">
+          <div style="width: 220px; height: 120px; margin: 0 auto; position: relative;">
+            <canvas id="gaugeCanvas"></canvas>
+          </div>
+          <div class="position-absolute start-50 translate-middle-x" style="bottom: 5px;">
+            <div class="display-5 fw-bold text-dark mb-0">{{ p.risk_score }}</div>
+            <div class="text-muted small">Score / 100</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <span class="badge badge-risk-{{ p.risk_level | lower }} fs-6 px-4 py-2">
+            Risk Tier: {{ p.risk_level }}
+          </span>
+        </div>
+
+        <p class="text-secondary small mb-3">
+          Calculated via multi-component synthesis: Isolation Forest, One-Class SVM, Random Forest, and Policy Rules Engine.
+        </p>
+
+        <!-- Model Sub-Scores Grid -->
+        <div class="row g-2 text-center border-top pt-3">
+          <div class="col-4">
+            <div class="p-2 border rounded-3 bg-light">
+              <span class="text-muted" style="font-size: 0.7rem;">Isolation Forest</span>
+              <div class="fw-bold text-dark">{{ p.if_anomaly_score }}</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded-3 bg-light">
+              <span class="text-muted" style="font-size: 0.7rem;">One-Class SVM</span>
+              <div class="fw-bold text-dark">{{ p.svm_anomaly_score }}</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded-3 bg-light">
+              <span class="text-muted" style="font-size: 0.7rem;">Random Forest</span>
+              <div class="fw-bold text-dark">{{ p.rf_anomaly_prob }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: 6 Risk Dimensions -->
+    <div class="col-lg-7">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white h-100">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-steps text-primary me-2"></i> Granular Risk Breakdown by Audit Dimension</h5>
+        
+        <!-- Dimension 1: Financial Risk -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-currency-rupee text-success me-1"></i> Financial Outlay Risk</span>
+            <span>{{ p.financial_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.financial_risk > 60 %}bg-danger{% elif p.financial_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.financial_risk }}%;"></div>
+          </div>
+        </div>
+
+        <!-- Dimension 2: Delay Risk -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-clock-history text-danger me-1"></i> Schedule & Delay Risk</span>
+            <span>{{ p.delay_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.delay_risk > 60 %}bg-danger{% elif p.delay_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.delay_risk }}%;"></div>
+          </div>
+        </div>
+
+        <!-- Dimension 3: Anomaly Risk -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-cpu text-primary me-1"></i> Unsupervised Statistical Anomaly Risk</span>
+            <span>{{ p.anomaly_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.anomaly_risk > 60 %}bg-danger{% elif p.anomaly_risk > 30 %}bg-warning{% else %}bg-primary{% endif %}" style="width: {{ p.anomaly_risk }}%;"></div>
+          </div>
+        </div>
+
+        <!-- Dimension 4: Duplicate Risk -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-copy text-info me-1"></i> Tender Redundancy / Duplicate Risk</span>
+            <span>{{ p.duplicate_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.duplicate_risk > 60 %}bg-danger{% elif p.duplicate_risk > 30 %}bg-warning{% else %}bg-info{% endif %}" style="width: {{ p.duplicate_risk }}%;"></div>
+          </div>
+        </div>
+
+        <!-- Dimension 5: Progress Risk -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-check-circle text-warning-emphasis me-1"></i> Physical Progress vs Disbursal Risk</span>
+            <span>{{ p.progress_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.progress_risk > 60 %}bg-danger{% elif p.progress_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.progress_risk }}%;"></div>
+          </div>
+        </div>
+
+        <!-- Dimension 6: Data Quality Risk -->
+        <div class="mb-2">
+          <div class="d-flex justify-content-between small fw-semibold mb-1">
+            <span><i class="bi bi-shield-check text-secondary me-1"></i> Data Quality & Record Integrity Risk</span>
+            <span>{{ p.data_quality_risk }} / 100</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if p.data_quality_risk > 60 %}bg-danger{% else %}bg-secondary{% endif %}" style="width: {{ p.data_quality_risk }}%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explainability: Why Was This Project Flagged? -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="fw-bold text-dark mb-0"><i class="bi bi-question-circle-fill text-danger me-2"></i> Why Was This Project Flagged? (Forensic Audit Trail)</h5>
+      <span class="badge bg-light text-muted border">Algorithmic Root Cause Analysis</span>
+    </div>
+
+    <!-- Mandatory Policy Callout -->
+    <div class="alert alert-secondary py-2 px-3 small mb-3 border-0 bg-light text-secondary">
+      <i class="bi bi-info-circle me-1"></i> <strong>Statutory Regulatory Notice:</strong> The indicators below represent statistical and compliance risk indicators requiring administrative verification and ground inspection. They do not constitute judicial or definitive findings of fraud.
+    </div>
+
+    <div class="list-group list-group-flush">
+      {% for reason in reasons %}
+      <div class="list-group-item px-0 py-2 d-flex align-items-start gap-2 border-0">
+        <i class="bi bi-exclamation-triangle-fill text-danger mt-1"></i>
+        <span class="text-dark small">{{ reason }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const gaugeCanvas = document.getElementById("gaugeCanvas");
+  if (gaugeCanvas) {
+    const score = {{ p.risk_score }};
+    new Chart(gaugeCanvas, {
+      type: "doughnut",
+      data: {
+        datasets: [{
+          data: [score, 100 - score],
+          backgroundColor: [
+            score >= 80 ? "#EF4444" : (score >= 60 ? "#F97316" : (score >= 40 ? "#EAB308" : "#22C55E")),
+            "#E2E8F0"
+          ],
+          borderWidth: 0,
+          circumference: 180,
+          rotation: 270
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        },
+        cutout: "75%"
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

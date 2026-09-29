@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% set active_page = "financial" %}
+
+{% block title %}Financial Flows Audit - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Financial Flows & Disbursal Audit</h3>
+      <p class="text-muted small mb-0">Three-way audit reconciling Sanctioned Allocations, Authorized Releases, and Incurred Expenditures</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.efficiency') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+        Next: Implementation Efficiency <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No financial data loaded.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Macro Financial Totals Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Cumulative Sanctioned Outlay</span>
+        <div class="kpi-val text-primary mt-1">₹{{ (total_sanctioned / 100) | round(2) }} <span class="fs-6 text-muted">Cr</span></div>
+        <small class="text-muted">₹{{ total_sanctioned }} Lakhs allocated</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Authorized Releases (Installments)</span>
+        <div class="kpi-val text-info mt-1">₹{{ (total_authorized / 100) | round(2) }} <span class="fs-6 text-muted">Cr</span></div>
+        <small class="text-muted">Funds credited to implementing agencies</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Incurred Program Expenditure</span>
+        <div class="kpi-val text-success mt-1">₹{{ (total_expenditure / 100) | round(2) }} <span class="fs-6 text-muted">Cr</span></div>
+        <small class="text-success"><i class="bi bi-check2"></i> {{ ((total_expenditure/total_sanctioned)*100) | round(1) }}% Net Outflow</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category-wise Table -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-wallet2 text-primary me-2"></i> Category-wise Three-Way Financial Breakdown</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Infrastructure Sector</th>
+            <th>Works Count</th>
+            <th>Sanctioned (₹ Lakhs)</th>
+            <th>Authorized (₹ Lakhs)</th>
+            <th>Expenditure (₹ Lakhs)</th>
+            <th>Release Ratio</th>
+            <th>Utilization Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in cat_flow %}
+          <tr>
+            <td class="fw-bold">{{ r.work_category }}</td>
+            <td>{{ r.count }}</td>
+            <td>₹{{ r.sanctioned }}L</td>
+            <td>₹{{ r.authorized }}L</td>
+            <td>₹{{ r.expenditure }}L</td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                {{ ((r.authorized / r.sanctioned)*100) | round(1) if r.sanctioned > 0 else 0 }}%
+              </span>
+            </td>
+            <td>
+              <span class="badge bg-primary-subtle text-primary border">
+                {{ ((r.expenditure / r.sanctioned)*100) | round(1) if r.sanctioned > 0 else 0 }}%
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Overspending Alert Table -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-octagon text-danger fs-5"></i>
+        <h6 class="fw-bold text-dark mb-0">Expenditure Exceeding Sanctioned Allocation (Sample Flagged Works)</h6>
+      </div>
+      <span class="badge bg-danger-subtle text-danger border">Policy Breach Risk</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>MP Name</th>
+            <th>Category</th>
+            <th>Sanctioned (₹)</th>
+            <th>Reported Spend (₹)</th>
+            <th>Variance Excess</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in overspend_list %}
+          <tr>
+            <td><code>{{ p.work_id }}</code></td>
+            <td>{{ p.mp_name }}</td>
+            <td><span class="badge bg-light text-dark border">{{ p.work_category }}</span></td>
+            <td>₹{{ p.sanctioned_amount }}L</td>
+            <td class="text-danger fw-bold">₹{{ p.expenditure }}L</td>
+            <td class="text-danger">+₹{{ (p.expenditure - p.sanctioned_amount) | round(2) }}L (+{{ ((p.sanction_utilization - 1)*100) | round(1) }}%)</td>
+            <td>
+              <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-danger py-0 px-2">
+                Inspect
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

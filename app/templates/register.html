@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% set active_page = "register" %}
+
+{% block title %}Auditor Registration - MPLADS AI Monitoring System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white">
+        <div class="text-center mb-4">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI Logo" width="56" height="56" class="mb-2">
+          <h4 class="fw-bold text-dark mb-1">Auditor Registration</h4>
+          <p class="text-muted small mb-0">Create your MPLADS Computational Audit Account</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          <div class="mb-3">
+            <label for="full_name" class="form-label small fw-semibold text-secondary">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" placeholder="e.g. Dr. Rajesh Sharma" required autofocus>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label small fw-semibold text-secondary">Username</label>
+              <input type="text" class="form-control" id="username" name="username" placeholder="e.g. rsharma_audit" required>
+            </div>
+            <div class="col-md-6">
+              <label for="role" class="form-label small fw-semibold text-secondary">Assigned Role</label>
+              <select class="form-select" id="role" name="role">
+                <option value="analyst" selected>Analyst (Data Analysis & Alerts)</option>
+                <option value="viewer">Viewer (Read-Only Observer)</option>
+                <option value="admin">Administrator (Settings & Weights)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label small fw-semibold text-secondary">Official Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="e.g. rajesh.sharma@gov-audit.in" required>
+          </div>
+
+          <div class="row g-2 mb-4">
+            <div class="col-md-6">
+              <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
+              <input type="password" class="form-control" id="password" name="password" placeholder="At least 6 characters" required>
+            </div>
+            <div class="col-md-6">
+              <label for="confirm_password" class="form-label small fw-semibold text-secondary">Confirm Password</label>
+              <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Re-type password" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
+            <i class="bi bi-person-check me-1"></i> Register Auditor Account
+          </button>
+        </form>
+
+        <div class="text-center small text-secondary">
+          Already registered? <a href="{{ url_for('auth.login') }}" class="text-primary text-decoration-none fw-semibold">Sign in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

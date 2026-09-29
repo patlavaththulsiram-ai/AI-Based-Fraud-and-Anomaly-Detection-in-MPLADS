@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% set active_page = "risk" %}
+
+{% block title %}Master Risk Register - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom flex-wrap gap-2">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Master Risk Register</h3>
+      <p class="text-muted small mb-0">Ranked algorithmic assessment of all evaluated MPLADS civil works across parliamentary constituencies</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.download_csv', export_name='projects_scored') }}" class="btn btn-sm btn-outline-success fw-semibold">
+        <i class="bi bi-download me-1"></i> Export Scored CSV
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No scored projects available.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Filters Bar -->
+  <div class="card border shadow-sm rounded-4 p-3 bg-white mb-4">
+    <form method="GET" action="{{ url_for('views.risk_list') }}" class="row g-2 align-items-center">
+      <!-- Search Input -->
+      <div class="col-md-3">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" name="q" class="form-control" placeholder="Search ID, MP, District..." value="{{ selected_query }}">
+        </div>
+      </div>
+
+      <!-- Risk Level Filter -->
+      <div class="col-md-2">
+        <select name="level" class="form-select form-select-sm">
+          <option value="">All Risk Tiers</option>
+          <option value="Critical" {% if selected_level == 'Critical' %}selected{% endif %}>Critical (80-100)</option>
+          <option value="High" {% if selected_level == 'High' %}selected{% endif %}>High (60-79)</option>
+          <option value="Medium" {% if selected_level == 'Medium' %}selected{% endif %}>Medium (40-59)</option>
+          <option value="Low" {% if selected_level == 'Low' %}selected{% endif %}>Low (0-39)</option>
+        </select>
+      </div>
+
+      <!-- State Filter -->
+      <div class="col-md-3">
+        <select name="state" class="form-select form-select-sm">
+          <option value="">All Parliamentary States</option>
+          {% for st in available_states %}
+          <option value="{{ st }}" {% if selected_state == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="col-md-2">
+        <select name="category" class="form-select form-select-sm">
+          <option value="">All Sectors</option>
+          {% for cat in available_categories %}
+          <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Submit & Reset Buttons -->
+      <div class="col-md-2 d-flex gap-1">
+        <button type="submit" class="btn btn-sm btn-primary w-100 fw-semibold">
+          Filter
+        </button>
+        <a href="{{ url_for('views.risk_list') }}" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Projects Table -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <div class="small fw-semibold text-secondary">
+        Showing {{ projects | length }} of {{ total_count }} matching projects
+      </div>
+      <span class="badge bg-light text-secondary border">Page {{ page }} of {{ total_pages }}</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>MP & Constituency</th>
+            <th>State / District</th>
+            <th>Sector</th>
+            <th>Sanction / Spend</th>
+            <th>Risk Score</th>
+            <th>Tier</th>
+            <th>Audit Indicators</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in projects %}
+          <tr>
+            <td>
+              <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="fw-bold text-decoration-none text-primary">
+                <code>{{ p.work_id }}</code>
+              </a>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ p.mp_name }}</div>
+              <div class="text-muted small">{{ p.constituency }}</div>
+            </td>
+            <td>
+              <div>{{ p.state }}</div>
+              <div class="text-muted small">{{ p.district }}</div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ p.work_category }}</span>
+            </td>
+            <td>
+              <div>₹{{ p.sanctioned_amount }}L</div>
+              <div class="text-muted small">Spend: ₹{{ p.expenditure }}L</div>
+            </td>
+            <td>
+              <div class="fw-bold fs-6">{{ p.risk_score }}</div>
+            </td>
+            <td>
+              <span class="badge badge-risk-{{ p.risk_level | lower }}">{{ p.risk_level }}</span>
+            </td>
+            <td style="max-width: 250px;">
+              {% if p.risk_reasons %}
+              <div class="small text-truncate text-secondary" title="{{ p.risk_reasons[0] }}">
+                {{ p.risk_reasons[0] }}
+              </div>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-danger py-0 px-2" title="Inspect Risk Dossier">
+                <i class="bi bi-shield-alert"></i> Dossier
+              </a>
+              <a href="{{ url_for('views.project_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Full Project Details">
+                <i class="bi bi-info-circle"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if total_pages > 1 %}
+    <div class="card-footer bg-white d-flex align-items-center justify-content-between py-3">
+      <div class="small text-muted">
+        Page {{ page }} of {{ total_pages }} ({{ total_count }} total entries)
+      </div>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('views.risk_list', page=page-1, q=selected_query, level=selected_level, state=selected_state, category=selected_category) }}">Previous</a>
+        </li>
+        <li class="page-item active">
+          <span class="page-link">{{ page }}</span>
+        </li>
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('views.risk_list', page=page+1, q=selected_query, level=selected_level, state=selected_state, category=selected_category) }}">Next</a>
+        </li>
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

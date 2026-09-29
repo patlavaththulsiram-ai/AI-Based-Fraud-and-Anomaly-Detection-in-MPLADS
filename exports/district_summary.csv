@@ -1,0 +1,121 @@
+﻿state,district,total_projects,total_sanctioned_lakhs,total_expenditure_lakhs,avg_sanction_utilization,avg_risk_score,critical_risk_projects,high_risk_projects,delayed_projects,avg_delay_days
+Andhra Pradesh,Anantapur,36,1173.51,951.0,79.6,15.9,0,2,2,156.5
+Andhra Pradesh,East Godavari,45,1492.69,1147.47,77.4,20.2,0,3,3,156.4
+Andhra Pradesh,Guntur,35,1272.86,1010.93,81.0,18.8,1,2,5,128.6
+Andhra Pradesh,Krishna,39,1257.16,1057.06,83.5,20.5,1,3,3,110.5
+Andhra Pradesh,Kurnool,31,1155.59,923.68,78.7,13.4,0,0,1,79.4
+Andhra Pradesh,Nellore,40,1332.95,1005.43,74.0,18.4,0,2,5,142.0
+Andhra Pradesh,Tirupati,40,1503.94,1154.7,75.0,19.2,1,2,7,164.8
+Andhra Pradesh,Visakhapatnam,26,901.41,750.99,83.0,24.2,1,3,4,258.3
+Andhra Pradesh,West Godavari,36,1087.06,909.68,82.6,15.4,0,1,2,120.1
+Andhra Pradesh,Ysr Kadapa,36,1394.22,964.74,70.6,18.5,0,1,2,185.5
+Gujarat,Ahmedabad,33,1247.2,992.57,77.4,17.2,0,1,3,171.1
+Gujarat,Anand,35,1133.3,917.53,80.0,15.2,0,1,0,96.0
+Gujarat,Bhavnagar,46,1452.79,1049.44,72.9,18.3,0,2,4,166.8
+Gujarat,Gandhinagar,35,1177.89,943.12,77.9,16.1,0,1,2,127.2
+Gujarat,Jamnagar,39,1431.18,1129.3,77.0,19.0,0,2,1,183.4
+Gujarat,Junagadh,49,1733.47,1335.5,76.3,16.8,0,2,4,176.4
+Gujarat,Kutch,52,1645.4,1227.29,75.7,20.9,0,6,2,126.3
+Gujarat,Rajkot,47,1354.18,1124.2,81.2,21.4,1,5,4,117.7
+Gujarat,Surat,38,1224.4,928.72,73.6,22.3,0,4,3,217.9
+Gujarat,Vadodara,36,1427.55,1132.11,79.4,20.1,2,1,3,166.9
+Karnataka,Ballari,51,1666.33,1385.86,83.5,17.9,1,3,1,66.4
+Karnataka,Belagavi,41,1547.73,1190.65,77.6,18.4,0,2,5,160.7
+Karnataka,Bengaluru Rural,45,1510.79,1208.96,75.8,22.1,1,5,2,146.4
+Karnataka,Bengaluru Urban,30,849.16,705.33,83.3,16.1,1,1,0,70.3
+Karnataka,Dakshina Kannada,51,1704.88,1373.13,80.9,21.6,2,4,7,202.1
+Karnataka,Dharwad,45,1399.24,1140.31,78.9,22.9,1,5,9,164.5
+Karnataka,Kalaburagi,32,1152.34,836.6,72.7,19.2,0,2,0,166.4
+Karnataka,Mysuru,45,1495.34,1149.48,79.2,20.8,0,4,5,209.2
+Karnataka,Shivamogga,50,1820.87,1399.16,78.7,23.2,1,6,1,119.8
+Karnataka,Tumakuru,38,1261.96,987.25,79.1,22.1,1,4,5,216.0
+Kerala,Alappuzha,46,1428.08,1153.57,82.5,22.0,1,5,3,153.2
+Kerala,Ernakulam,37,1198.52,916.88,74.5,16.5,0,1,1,110.9
+Kerala,Kannur,48,1518.92,1125.71,74.9,17.7,0,3,6,187.1
+Kerala,Kollam,31,1230.58,952.5,77.6,17.4,1,0,3,99.1
+Kerala,Kottayam,49,1771.99,1296.53,73.2,17.0,0,1,4,126.1
+Kerala,Kozhikode,46,1334.06,1128.08,83.8,14.6,1,1,1,131.3
+Kerala,Malappuram,40,1421.6,1098.0,78.9,16.6,1,0,2,159.9
+Kerala,Palakkad,31,1117.72,936.54,83.3,26.0,3,2,4,254.7
+Kerala,Thiruvananthapuram,43,1436.83,1061.58,75.2,17.8,1,3,5,138.6
+Kerala,Thrissur,48,1609.83,1278.87,80.0,18.6,1,4,6,55.0
+Madhya Pradesh,Bhopal,40,1576.02,1227.47,78.2,20.0,1,2,8,238.8
+Madhya Pradesh,Dewas,39,1337.76,1129.9,81.5,15.6,0,1,0,70.5
+Madhya Pradesh,Gwalior,43,1346.12,1120.57,84.4,18.1,1,2,2,164.2
+Madhya Pradesh,Indore,38,1395.95,1098.48,76.0,19.8,0,1,4,146.4
+Madhya Pradesh,Jabalpur,44,1690.2,1350.12,79.1,16.0,0,1,3,245.5
+Madhya Pradesh,Ratlam,39,1204.6,971.0,79.3,21.1,0,2,4,190.7
+Madhya Pradesh,Rewa,33,1000.04,833.17,85.0,19.5,0,3,2,137.5
+Madhya Pradesh,Sagar,41,1466.89,1110.57,75.8,17.0,0,2,6,144.5
+Madhya Pradesh,Satna,41,1429.79,1122.34,77.4,15.5,0,0,4,151.9
+Madhya Pradesh,Ujjain,48,1778.0,1468.03,84.5,18.8,1,4,2,116.8
+Maharashtra,Amravati,35,1292.81,1026.94,82.9,21.3,1,4,1,119.3
+Maharashtra,Chhatrapati Sambhajinagar,36,1049.35,813.88,78.8,21.5,0,3,4,123.5
+Maharashtra,Kolhapur,39,1228.01,955.83,79.6,17.0,0,1,4,173.1
+Maharashtra,Mumbai City,49,1492.12,1179.59,79.7,23.3,1,6,6,224.8
+Maharashtra,Mumbai Suburban,45,1474.42,1159.74,80.2,18.4,1,3,4,144.3
+Maharashtra,Nagpur,46,1658.56,1332.48,79.2,20.5,1,4,6,147.1
+Maharashtra,Nashik,46,1401.71,1198.08,85.5,19.9,1,3,5,105.9
+Maharashtra,Pune,49,1638.76,1379.66,84.6,21.3,1,2,3,114.8
+Maharashtra,Solapur,62,2145.84,1764.23,80.5,20.5,1,5,6,174.2
+Maharashtra,Thane,34,1116.91,993.76,90.7,20.8,1,4,0,166.5
+Odisha,Angul,58,1811.55,1488.13,81.2,18.3,0,2,2,137.4
+Odisha,Balasore,45,1429.1,1208.93,83.9,19.3,1,2,3,95.3
+Odisha,Cuttack,38,1226.4,869.4,74.7,17.3,0,1,2,160.2
+Odisha,Ganjam,40,1207.7,943.24,79.0,18.6,1,1,3,180.3
+Odisha,Khordha,42,1315.59,1015.86,78.6,19.5,1,3,2,193.3
+Odisha,Koraput,37,1249.12,954.23,75.8,17.9,1,2,3,98.2
+Odisha,Mayurbhanj,48,1704.62,1253.16,76.1,16.3,0,1,2,125.0
+Odisha,Puri,33,990.87,759.91,71.3,19.2,1,1,4,147.0
+Odisha,Sambalpur,52,1612.38,1293.89,79.4,22.6,1,6,2,148.5
+Odisha,Sundargarh,38,1018.73,685.56,75.0,17.4,0,1,4,199.7
+Rajasthan,Ajmer,38,1419.01,1106.99,78.8,23.9,1,3,5,219.9
+Rajasthan,Alwar,46,1565.87,1165.61,77.5,22.9,1,5,4,209.8
+Rajasthan,Barmer,38,1201.06,973.48,83.4,16.6,0,3,4,111.8
+Rajasthan,Bhilwara,32,1121.83,870.2,77.3,17.8,0,2,5,154.8
+Rajasthan,Bikaner,42,1335.75,1027.11,77.7,15.2,0,1,1,139.3
+Rajasthan,Jaipur,45,1623.06,1174.57,74.2,13.1,0,0,1,106.8
+Rajasthan,Jodhpur,43,1285.99,954.86,75.9,15.8,0,1,1,89.9
+Rajasthan,Kota,41,1395.19,1249.67,86.3,20.2,1,4,2,165.6
+Rajasthan,Sikar,39,1414.62,1117.78,79.0,19.6,2,1,6,119.9
+Rajasthan,Udaipur,38,1140.09,855.01,71.8,20.5,0,3,6,240.8
+Tamil Nadu,Chennai,44,1410.83,1156.65,80.6,21.8,1,4,6,177.3
+Tamil Nadu,Coimbatore,36,1186.56,958.23,81.1,19.7,2,2,1,83.2
+Tamil Nadu,Erode,41,1396.84,1010.43,77.2,12.9,0,0,3,121.8
+Tamil Nadu,Kanyakumari,47,1526.09,1286.15,83.6,23.6,1,6,4,151.2
+Tamil Nadu,Madurai,42,1618.28,1135.2,71.7,21.9,1,3,7,176.7
+Tamil Nadu,Salem,32,1139.22,927.52,77.2,17.8,1,1,4,185.2
+Tamil Nadu,Thanjavur,41,1394.2,1144.42,80.3,16.7,1,1,3,140.1
+Tamil Nadu,Tiruchirappalli,35,1198.34,889.72,75.1,17.5,0,2,2,154.8
+Tamil Nadu,Tirunelveli,39,1153.44,836.42,71.3,19.4,0,1,7,192.4
+Tamil Nadu,Vellore,34,1215.57,943.2,77.5,16.0,0,1,2,120.6
+Telangana,Hyderabad,35,1198.86,1006.03,82.5,19.2,1,2,3,181.9
+Telangana,Karimnagar,45,1564.21,1337.47,83.0,19.5,0,5,1,116.6
+Telangana,Khammam,46,1658.31,1385.59,82.0,24.7,0,6,6,214.7
+Telangana,Mahabubnagar,41,1472.7,1244.97,83.4,17.3,1,1,2,108.8
+Telangana,Medchal-Malkajgiri,50,1911.97,1481.23,79.6,14.7,0,1,2,85.4
+Telangana,Nalgonda,43,1586.43,1180.76,75.3,22.1,0,5,5,183.7
+Telangana,Nizamabad,43,1377.19,1035.23,74.4,18.1,0,2,5,143.4
+Telangana,Ranga Reddy,37,1162.6,1017.96,85.6,14.9,0,2,0,60.5
+Telangana,Siddipet,34,1162.38,929.54,80.3,28.1,2,6,3,237.5
+Telangana,Warangal,41,1575.78,1212.21,74.8,18.8,0,2,4,123.4
+Uttar Pradesh,Agra,35,1281.21,905.67,73.3,14.7,0,0,5,139.6
+Uttar Pradesh,Ayodhya,47,1644.82,1382.59,84.4,21.1,2,4,6,199.3
+Uttar Pradesh,Bareilly,30,1086.48,863.5,78.0,20.4,1,2,5,205.9
+Uttar Pradesh,Ghaziabad,33,1163.23,928.44,84.4,20.9,0,3,3,154.7
+Uttar Pradesh,Gorakhpur,53,1479.86,1186.68,78.4,22.6,2,4,5,117.1
+Uttar Pradesh,Kanpur Nagar,49,1690.68,1348.24,77.7,21.9,1,3,4,164.5
+Uttar Pradesh,Lucknow,42,1378.34,1146.71,81.0,16.2,0,3,1,89.8
+Uttar Pradesh,Meerut,41,1356.38,1001.52,75.1,13.5,0,0,3,131.0
+Uttar Pradesh,Prayagraj,44,1421.46,1132.49,77.4,20.5,0,6,4,133.8
+Uttar Pradesh,Varanasi,58,1791.01,1437.01,80.9,17.4,0,3,3,113.0
+West Bengal,Darjeeling,30,1056.86,850.57,79.9,26.0,0,6,3,178.1
+West Bengal,Hooghly,45,1574.05,1173.51,71.8,18.2,0,2,3,153.8
+West Bengal,Howrah,40,1499.13,1217.69,80.6,23.2,1,3,1,225.9
+West Bengal,Kolkata,37,1350.81,1026.26,75.1,20.1,0,3,3,181.9
+West Bengal,Malda,46,1457.44,949.33,69.2,18.6,0,2,7,144.8
+West Bengal,Murshidabad,43,1330.21,998.11,78.0,16.9,1,2,3,115.2
+West Bengal,Nadia,48,1656.22,1289.82,78.3,16.1,0,2,6,106.1
+West Bengal,North 24 Parganas,44,1536.25,1314.96,84.1,15.8,0,2,3,114.2
+West Bengal,Paschim Bardhaman,39,1083.32,839.45,77.4,21.0,0,4,4,103.5
+West Bengal,South 24 Parganas,39,1118.72,897.54,78.2,13.7,0,0,1,61.3

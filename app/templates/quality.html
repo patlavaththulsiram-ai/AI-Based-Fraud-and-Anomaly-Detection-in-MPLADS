@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% set active_page = "quality" %}
+
+{% block title %}Data Quality Score - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Data Quality Evaluation Score</h3>
+      <p class="text-muted small mb-0">Quantitative 0–100 index assessing Completeness, Semantic Consistency, Value Validity, and Entity Uniqueness</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.eda') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+        Proceed to Analysis <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No data quality score available.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Overall Score Hero Banner -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-4 text-center border-end">
+        <span class="text-muted small text-uppercase fw-bold">Overall Data Quality Index</span>
+        <div class="display-3 fw-bold text-primary my-2">{{ quality.overall_score }}<span class="fs-4 text-muted">/100</span></div>
+        <div>
+          <span class="badge bg-success-subtle text-success fs-6 px-3 py-1 border border-success-subtle">
+            Grade {{ quality.grade }}: {{ quality.grade_description }}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-8 ps-md-4 mt-4 mt-md-0">
+        <h5 class="fw-bold text-dark mb-2">Quality Audit Summary & Recommendations</h5>
+        <ul class="mb-0 text-secondary small">
+          {% for rec in quality.recommendations %}
+          <li class="mb-1">{{ rec }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Four Sub-Scores Grid -->
+  <div class="row g-3 mb-4">
+    <!-- Completeness -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Completeness</span>
+          <span class="badge bg-light text-secondary border">Weight: 30%</span>
+        </div>
+        <div class="kpi-val text-dark">{{ quality.sub_scores.completeness }}%</div>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-primary" role="progressbar" style="width: {{ quality.sub_scores.completeness }}%;"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">Non-null attribute population across canonical columns</small>
+      </div>
+    </div>
+
+    <!-- Consistency -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Consistency</span>
+          <span class="badge bg-light text-secondary border">Weight: 25%</span>
+        </div>
+        <div class="kpi-val text-dark">{{ quality.sub_scores.consistency }}%</div>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-info" role="progressbar" style="width: {{ quality.sub_scores.consistency }}%;"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">Logical harmony across dates, milestones, and status</small>
+      </div>
+    </div>
+
+    <!-- Validity -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Validity</span>
+          <span class="badge bg-light text-secondary border">Weight: 25%</span>
+        </div>
+        <div class="kpi-val text-dark">{{ quality.sub_scores.validity }}%</div>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-success" role="progressbar" style="width: {{ quality.sub_scores.validity }}%;"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">Numeric bounds, non-negativity, and geo bounds</small>
+      </div>
+    </div>
+
+    <!-- Uniqueness -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Uniqueness</span>
+          <span class="badge bg-light text-secondary border">Weight: 20%</span>
+        </div>
+        <div class="kpi-val text-dark">{{ quality.sub_scores.uniqueness }}%</div>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-warning" role="progressbar" style="width: {{ quality.sub_scores.uniqueness }}%;"></div>
+        </div>
+        <small class="text-muted mt-2 d-block">Absence of duplicate identifiers & ghost works</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Radar / Dimension Visualization -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white h-100">
+        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-radar text-primary me-2"></i> Quality Dimension Radar</h6>
+        <div class="chart-container d-flex align-items-center justify-content-center">
+          <canvas id="qualityRadarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white h-100">
+        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-primary me-2"></i> Methodology & Benchmark Standards</h6>
+        <p class="text-secondary small mb-3">
+          The Data Quality Index uses weighted Euclidean distance from ideal schema conformity:
+        </p>
+        <div class="p-3 rounded-3 bg-light border small text-dark mb-3">
+          <code>Quality Score = 0.30(Completeness) + 0.25(Consistency) + 0.25(Validity) + 0.20(Uniqueness)</code>
+        </div>
+        <ul class="text-secondary small mb-4">
+          <li><strong>Grade A (&ge; 90):</strong> Ready for automated machine learning inference.</li>
+          <li><strong>Grade B (75–89):</strong> Reliable for executive oversight with minor imputation.</li>
+          <li><strong>Grade C (60–74):</strong> High noise level; manual verification recommended.</li>
+          <li><strong>Grade D (&lt; 60):</strong> Severe data corruption; quarantined from analytics.</li>
+        </ul>
+        <a href="{{ url_for('views.eda') }}" class="btn btn-primary w-100 fw-semibold shadow-sm">
+          Proceed to Exploratory Analysis (Screen 9) <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if has_data %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const radarCtx = document.getElementById("qualityRadarChart");
+  if (radarCtx) {
+    new Chart(radarCtx, {
+      type: "radar",
+      data: {
+        labels: ["Completeness", "Consistency", "Validity", "Uniqueness"],
+        datasets: [{
+          label: "Achieved Quality Score",
+          data: [
+            {{ quality.sub_scores.completeness }},
+            {{ quality.sub_scores.consistency }},
+            {{ quality.sub_scores.validity }},
+            {{ quality.sub_scores.uniqueness }}
+          ],
+          backgroundColor: "rgba(37, 99, 235, 0.2)",
+          borderColor: "#2563EB",
+          pointBackgroundColor: "#2563EB",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "#2563EB"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: "#E2E8F0" },
+            grid: { color: "#F1F5F9" },
+            suggestedMin: 50,
+            suggestedMax: 100,
+            ticks: { stepSize: 10 }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

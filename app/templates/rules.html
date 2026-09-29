@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% set active_page = "rules" %}
+
+{% block title %}Rule-Based Anomaly Engine - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Deterministic Rule-Based Anomaly Engine</h3>
+      <p class="text-muted small mb-0">Statutory MPLADS operational guideline checks and policy violation indicators</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.ml_detection') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+        Next: ML Detection Suite <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No rule evaluation available.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Macro Rule Engine Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Total Audited Works</span>
+        <div class="kpi-val text-dark mt-1">{{ summary.total_audited_records }}</div>
+        <small class="text-muted">100% evaluated across 8 statutory rules</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Works With At Least 1 Violation</span>
+        <div class="kpi-val text-danger mt-1">{{ summary.records_with_any_violation }}</div>
+        <small class="text-danger"><i class="bi bi-flag-fill"></i> Triggered one or more audit rules</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Systemic Violation Ratio</span>
+        <div class="kpi-val text-warning-emphasis mt-1">{{ summary.violation_rate }}%</div>
+        <small class="text-muted">Proportion of candidate flagged works</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- The 8 Statutory Rules Cards / Grid -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-primary me-2"></i> Statutory Audit Rules Catalog & Hit Counts</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 70px;">Code</th>
+            <th>Rule Name</th>
+            <th style="width: 110px;">Severity</th>
+            <th>Guideline / Policy Description</th>
+            <th style="width: 110px;">Hit Count</th>
+            <th style="width: 110px;">Hit Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for col, r in summary.rule_counts.items() %}
+          <tr>
+            <td><span class="badge bg-dark">{{ r.code }}</span></td>
+            <td class="fw-bold text-dark">{{ r.name }}</td>
+            <td>
+              <span class="badge {% if r.severity == 'Critical' %}bg-danger-subtle text-danger{% elif r.severity == 'High' %}bg-warning-subtle text-warning-emphasis{% else %}bg-info-subtle text-info{% endif %} border">
+                {{ r.severity }}
+              </span>
+            </td>
+            <td class="small text-secondary">{{ r.description }}</td>
+            <td class="fw-bold text-dark">{{ r.hit_count }}</td>
+            <td>
+              <span class="badge bg-light text-secondary border">{{ r.hit_percentage }}%</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sample Multi-Rule Flagged Projects -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+        <h6 class="fw-bold text-dark mb-0">Works Triggering Multiple Rule Violations (Sample)</h6>
+      </div>
+      <span class="badge bg-danger-subtle text-danger border">High Priority Audit Target</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>MP Name</th>
+            <th>State / District</th>
+            <th>Category</th>
+            <th>Spend / Sanction</th>
+            <th>Rules Triggered</th>
+            <th>Risk Score</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in flagged_records %}
+          <tr>
+            <td><code>{{ p.work_id }}</code></td>
+            <td>{{ p.mp_name }}</td>
+            <td>{{ p.state }} / {{ p.district }}</td>
+            <td><span class="badge bg-light text-dark border">{{ p.work_category }}</span></td>
+            <td>₹{{ p.expenditure }}L / ₹{{ p.sanctioned_amount }}L</td>
+            <td>
+              <span class="badge bg-danger">{{ p.total_rules_triggered }} Rules Hit</span>
+            </td>
+            <td><span class="fw-bold text-danger">{{ p.risk_score }}</span></td>
+            <td>
+              <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-primary py-0 px-2">
+                Inspect Dossier
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

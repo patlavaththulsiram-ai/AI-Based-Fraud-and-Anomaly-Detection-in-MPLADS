@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% set active_page = "validate" %}
+
+{% block title %}Validation Audit Report - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Data Validation Audit</h3>
+      <p class="text-muted small mb-0">Structural, semantic, and boundary checks identifying corrupt records and missing values</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.clean_view') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+        Next: View Data Cleaning Log <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No dataset currently loaded for validation.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- Health Counters Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Total Evaluated Records</span>
+        <div class="kpi-val text-dark mt-1">{{ val_report.total_records | default(0) }}</div>
+        <small class="text-muted">Direct intake volume</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Valid Operational Records</span>
+        <div class="kpi-val text-success mt-1">{{ val_report.valid_records | default(0) }}</div>
+        <small class="text-success"><i class="bi bi-check-circle"></i> Passed all boundary constraints</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Quarantined Invalid Records</span>
+        <div class="kpi-val text-danger mt-1">{{ val_report.invalid_records | default(0) }}</div>
+        <small class="text-danger"><i class="bi bi-shield-x"></i> Isolated from ML model ingestion</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Validation Health Rate</span>
+        <div class="kpi-val text-primary mt-1">{{ val_report.validation_rate | default('0.0') }}%</div>
+        <small class="text-muted">Structural integrity quotient</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warnings List -->
+  {% if val_report.warnings %}
+  <div class="card border-warning border-opacity-50 shadow-sm rounded-4 p-3 bg-warning bg-opacity-10 mb-4">
+    <h6 class="fw-bold text-warning-emphasis mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i> Audit Warnings Detected</h6>
+    <ul class="mb-0 small text-secondary">
+      {% for w in val_report.warnings %}
+      <li>{{ w }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Field Completeness Summary Table -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-check text-primary me-2"></i> Canonical Field Population Audit</h5>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Canonical Column</th>
+            <th>Required Category</th>
+            <th>Null / Missing Count</th>
+            <th>Completeness Rate</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for col, meta in val_report.field_summary.items() %}
+          <tr>
+            <td><code>{{ col }}</code></td>
+            <td>
+              {% if col in ['work_id', 'state', 'district', 'sanctioned_amount', 'expenditure'] %}
+              <span class="badge bg-danger-subtle text-danger border">Mandatory</span>
+              {% else %}
+              <span class="badge bg-light text-muted border">Operational</span>
+              {% endif %}
+            </td>
+            <td>{{ meta.null_count }}</td>
+            <td style="width: 280px;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height: 6px;">
+                  <div class="progress-bar bg-primary" role="progressbar" style="width: {{ 100 - meta.null_pct }}%;"></div>
+                </div>
+                <span class="small text-muted" style="min-width: 45px;">{{ (100 - meta.null_pct) | round(1) }}%</span>
+              </div>
+            </td>
+            <td>
+              {% if meta.null_pct == 0.0 %}
+              <span class="badge bg-success-subtle text-success"><i class="bi bi-check2"></i> Complete</span>
+              {% elif meta.null_pct < 10.0 %}
+              <span class="badge bg-info-subtle text-info">Acceptable</span>
+              {% else %}
+              <span class="badge bg-warning-subtle text-warning-emphasis">Imputation Required</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quarantined Records Table -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-shield-x text-danger fs-5"></i>
+        <h6 class="fw-bold text-dark mb-0">Isolated Quarantine Register ({{ quarantine_count }} Anomalous Records)</h6>
+      </div>
+      <span class="badge bg-danger-subtle text-danger border">Quarantined from ML Inference</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>Location</th>
+            <th>Sanctioned (₹)</th>
+            <th>Reported Spend (₹)</th>
+            <th>Status</th>
+            <th>Specific Validation Violations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in quarantined_records %}
+          <tr>
+            <td><code>{{ r.work_id }}</code></td>
+            <td>{{ r.state }} / {{ r.district }}</td>
+            <td>₹{{ r.sanctioned }}L</td>
+            <td>₹{{ r.expenditure }}L</td>
+            <td>{{ r.status }}</td>
+            <td class="text-danger small">{{ r.issues }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

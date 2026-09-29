@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% set active_page = "eda" %}
+
+{% block title %}Exploratory Data Analysis - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Exploratory Data Analysis (EDA)</h3>
+      <p class="text-muted small mb-0">Multivariate statistical distributions across project types, expenditure scales, and geographic regions</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.financial') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
+        Next: Financial Analysis <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <h5>No dataset loaded for exploratory data analysis.</h5>
+    <div class="mt-3">
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- EDA Navigation Tabs -->
+  <div class="card border shadow-sm rounded-4 p-3 bg-white mb-4">
+    <ul class="nav nav-pills mb-3" id="edaTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-semibold" id="projects-tab" data-bs-toggle="pill" data-bs-target="#projects-panel" type="button" role="tab">
+          <i class="bi bi-diagram-2 me-1"></i> Projects Overview
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="financial-tab" data-bs-toggle="pill" data-bs-target="#financial-panel" type="button" role="tab">
+          <i class="bi bi-cash-stack me-1"></i> Financial Outlays
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="location-tab" data-bs-toggle="pill" data-bs-target="#location-panel" type="button" role="tab">
+          <i class="bi bi-geo-alt me-1"></i> Geographic Slices
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-semibold" id="category-tab" data-bs-toggle="pill" data-bs-target="#category-panel" type="button" role="tab">
+          <i class="bi bi-tags me-1"></i> Sectoral Breakdown
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="edaTabContent">
+      <!-- Tab 1: Projects Overview -->
+      <div class="tab-pane fade show active" id="projects-panel" role="tabpanel">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 bg-light">
+              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart me-1 text-primary"></i> Projects by Work Category</h6>
+              <div class="chart-container">
+                <canvas id="edaCategoryDoughnut"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 bg-light">
+              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart me-1 text-primary"></i> Projects by Implementation Status</h6>
+              <div class="chart-container">
+                <canvas id="edaStatusBar"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Financial Outlays -->
+      <div class="tab-pane fade" id="financial-panel" role="tabpanel">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 bg-light">
+              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-steps me-1 text-success"></i> Expenditure Histogram (Bins in ₹ Lakhs)</h6>
+              <div class="chart-container">
+                <canvas id="edaExpHistogram"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 bg-light">
+              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-arrow-left-right me-1 text-success"></i> Sanctioned vs Expenditure per Sector</h6>
+              <div class="chart-container">
+                <canvas id="edaFinCategoryBar"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Geographic Slices -->
+      <div class="tab-pane fade" id="location-panel" role="tabpanel">
+        <div class="p-3 border rounded-3 bg-light">
+          <h6 class="fw-bold text-dark mb-3"><i class="bi bi-map me-1 text-primary"></i> Project Concentration Across Major States</h6>
+          <div class="chart-container-tall">
+            <canvas id="edaStateBar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Sectoral Breakdown -->
+      <div class="tab-pane fade" id="category-panel" role="tabpanel">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Sector / Category</th>
+                <th>Total Projects</th>
+                <th>Sanctioned Outlay (₹ Lakhs)</th>
+                <th>Reported Expenditure (₹ Lakhs)</th>
+                <th>Utilization Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cat, stats in cat_fin.items() %}
+              <tr>
+                <td class="fw-bold">{{ cat }}</td>
+                <td>{{ cat_counts.get(cat, 0) }}</td>
+                <td>₹{{ stats.sanctioned | round(2) }}L</td>
+                <td>₹{{ stats.expenditure | round(2) }}L</td>
+                <td>
+                  <span class="badge bg-primary-subtle text-primary border">
+                    {{ ((stats.expenditure / stats.sanctioned)*100) | round(1) if stats.sanctioned > 0 else 0 }}%
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if has_data %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Category Doughnut
+  const catCtx = document.getElementById("edaCategoryDoughnut");
+  if (catCtx) {
+    new Chart(catCtx, {
+      type: "doughnut",
+      data: {
+        labels: {{ cat_counts.keys() | list | tojson }},
+        datasets: [{
+          data: {{ cat_counts.values() | list | tojson }},
+          backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"]
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // Status Bar
+  const statusCtx = document.getElementById("edaStatusBar");
+  if (statusCtx) {
+    new Chart(statusCtx, {
+      type: "bar",
+      data: {
+        labels: {{ status_counts.keys() | list | tojson }},
+        datasets: [{
+          label: "Projects",
+          data: {{ status_counts.values() | list | tojson }},
+          backgroundColor: "#2563EB",
+          borderRadius: 6
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // Expenditure Histogram
+  const expCtx = document.getElementById("edaExpHistogram");
+  if (expCtx) {
+    new Chart(expCtx, {
+      type: "bar",
+      data: {
+        labels: {{ exp_hist.keys() | list | tojson }},
+        datasets: [{
+          label: "Number of Projects in Spend Range",
+          data: {{ exp_hist.values() | list | tojson }},
+          backgroundColor: "#10B981",
+          borderRadius: 6
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // Financial Category Bar
+  const finCtx = document.getElementById("edaFinCategoryBar");
+  if (finCtx) {
+    new Chart(finCtx, {
+      type: "bar",
+      data: {
+        labels: {{ cat_fin.keys() | list | tojson }},
+        datasets: [
+          {
+            label: "Sanctioned (₹ Lakhs)",
+            data: [{% for c in cat_fin.values() %}{{ c.sanctioned }},{% endfor %}],
+            backgroundColor: "#93C5FD",
+            borderRadius: 4
+          },
+          {
+            label: "Expenditure (₹ Lakhs)",
+            data: [{% for c in cat_fin.values() %}{{ c.expenditure }},{% endfor %}],
+            backgroundColor: "#2563EB",
+            borderRadius: 4
+          }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // State Bar
+  const stateCtx = document.getElementById("edaStateBar");
+  if (stateCtx) {
+    new Chart(stateCtx, {
+      type: "bar",
+      data: {
+        labels: {{ state_counts.keys() | list | tojson }},
+        datasets: [{
+          label: "Project Volume",
+          data: {{ state_counts.values() | list | tojson }},
+          backgroundColor: "#4F46E5",
+          borderRadius: 6
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

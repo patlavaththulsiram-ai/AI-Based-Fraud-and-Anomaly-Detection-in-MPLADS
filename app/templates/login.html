@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% set active_page = "login" %}
+
+{% block title %}Sign In - MPLADS AI Monitoring System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white">
+        <div class="text-center mb-4">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI Logo" width="56" height="56" class="mb-2">
+          <h4 class="fw-bold text-dark mb-1">Auditor Sign In</h4>
+          <p class="text-muted small mb-0">MPLADS AI Anomaly & Fraud Risk Detection Portal</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label for="username" class="form-label small fw-semibold text-secondary">Username or Official Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" class="form-control" id="username" name="username" placeholder="e.g. admin or analyst@mplads-ai.gov.in" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+            </div>
+          </div>
+
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+            <label class="form-check-label small text-secondary" for="remember">
+              Remember my session
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Audit Console
+          </button>
+        </form>
+
+        <div class="p-3 rounded-3 bg-light border mb-3">
+          <div class="small fw-bold text-secondary mb-2"><i class="bi bi-info-circle me-1"></i> Quick Demo Credentials:</div>
+          <div class="d-flex flex-column gap-1" style="font-size: 0.78rem;">
+            <div><span class="badge bg-danger-subtle text-danger border">Admin</span> <code>admin</code> / <code>admin123</code> (Full calibration & triage)</div>
+            <div><span class="badge bg-primary-subtle text-primary border">Analyst</span> <code>analyst</code> / <code>analyst123</code> (Audit analysis & alerts)</div>
+            <div><span class="badge bg-secondary-subtle text-secondary border">Viewer</span> <code>viewer</code> / <code>viewer123</code> (Read-only dashboard access)</div>
+          </div>
+        </div>
+
+        <div class="text-center small text-secondary">
+          Don't have an auditor account? <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none fw-semibold">Register here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

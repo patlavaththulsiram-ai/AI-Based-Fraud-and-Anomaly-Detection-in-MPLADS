@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Executive Audit Dashboard - MPLADS AI Sentinel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Executive Audit Dashboard</h3>
+      <p class="text-muted small mb-0">System-wide monitoring of MPLADS fund allocations, execution velocity, and fraud-risk signals</p>
+    </div>
+    <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+      {% if has_data %}
+      <span class="badge bg-light text-secondary border px-3 py-2">
+        <i class="bi bi-clock-history me-1"></i> Cached: {{ cache_timestamp }}
+      </span>
+      <a href="{{ url_for('views.reports_view') }}" class="btn btn-sm btn-outline-primary fw-semibold">
+        <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+      </a>
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-sm btn-primary fw-semibold shadow-sm">
+        <i class="bi bi-arrow-repeat me-1"></i> Refresh Pipeline
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not has_data %}
+  <!-- Empty State Banner (Never show hardcoded fake numbers) -->
+  <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-4 bg-white mb-4">
+    <div class="py-5">
+      <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width: 80px; height: 80px;">
+        <i class="bi bi-database-exclamation fs-1"></i>
+      </div>
+      <h4 class="fw-bold text-dark mb-2">No MPLADS Project Dataset Loaded</h4>
+      <p class="text-secondary col-md-6 mx-auto mb-4 small">
+        To compute executive KPIs, machine learning anomaly scores, and compliance risk flags, please load the pre-generated benchmark synthetic dataset or ingest an official government portal export.
+      </p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
+          <i class="bi bi-play-circle me-2"></i> Load Demo Dataset (5,000 Projects)
+        </a>
+        <a href="{{ url_for('views.upload') }}" class="btn btn-outline-secondary px-4 py-2 fw-semibold">
+          <i class="bi bi-cloud-arrow-up me-2"></i> Upload Custom CSV / XLSX
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- 8 KPI Cards Grid -->
+  <div class="row g-3 mb-4">
+    <!-- KPI 1: Total Projects -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Total Projects Audited</span>
+          <div class="kpi-icon-box bg-primary-subtle text-primary">
+            <i class="bi bi-folder2"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">{{ kpis.total_projects | default(0) }}</div>
+        <div class="small text-muted mt-1">
+          <span class="badge bg-light text-secondary border">100% Schema Valid</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Total Funds Sanctioned -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Total Funds Sanctioned</span>
+          <div class="kpi-icon-box bg-success-subtle text-success">
+            <i class="bi bi-currency-rupee"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">₹{{ kpis.total_funds_crores | default('0.00') }} <span class="fs-6 text-muted">Cr</span></div>
+        <div class="small text-muted mt-1">
+          Disbursed: ₹{{ kpis.total_expenditure_crores | default('0.00') }} Cr
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Completed Projects -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Completed Works</span>
+          <div class="kpi-icon-box bg-info-subtle text-info">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">{{ kpis.completed_count | default(0) }}</div>
+        <div class="small text-muted mt-1">
+          <span class="badge bg-info-subtle text-info border">{{ kpis.completed_pct | default('0.0') }}% Completion Rate</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 4: High & Critical Risk -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">High & Critical Risk</span>
+          <div class="kpi-icon-box bg-danger-subtle text-danger">
+            <i class="bi bi-shield-alert"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-danger">{{ kpis.high_critical_risk_count | default(0) }}</div>
+        <div class="small text-muted mt-1">
+          <span class="badge bg-danger-subtle text-danger border">{{ kpis.high_critical_risk_pct | default('0.0') }}% Requiring Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 5: Pending & Delayed Projects -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Pending / Delayed</span>
+          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
+            <i class="bi bi-hourglass-bottom"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-warning-emphasis">{{ kpis.delayed_pending_count | default(0) }}</div>
+        <div class="small text-muted mt-1">
+          Delayed: {{ kpis.delayed_count | default(0) }} | Pending: {{ kpis.pending_count | default(0) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 6: Average Delay -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Average Completion Delay</span>
+          <div class="kpi-icon-box bg-secondary-subtle text-secondary">
+            <i class="bi bi-calendar-x"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">{{ kpis.avg_delay_days | default(0) }} <span class="fs-6 text-muted">Days</span></div>
+        <div class="small text-muted mt-1">
+          Max Delay: {{ kpis.max_delay_days | default(0) }} days
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 7: Utilization Rate -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Sanction Utilization</span>
+          <div class="kpi-icon-box bg-primary-subtle text-primary">
+            <i class="bi bi-percent"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">{{ kpis.utilization_rate_pct | default('0.0') }}%</div>
+        <div class="small text-muted mt-1">
+          Spend-Progress Gap: {{ kpis.avg_spend_progress_gap | default('0.0') }}%
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 8: Average System Risk Score -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="kpi-label">Mean Composite Risk</span>
+          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
+            <i class="bi bi-speedometer"></i>
+          </div>
+        </div>
+        <div class="kpi-val text-dark">{{ kpis.avg_risk_score | default('0.0') }} <span class="fs-6 text-muted">/100</span></div>
+        <div class="small text-muted mt-1">
+          Tier: <span class="badge badge-risk-{{ kpis.avg_risk_tier | lower }}">{{ kpis.avg_risk_tier }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1: Status Donut & Risk Tier Distribution -->
+  <div class="row g-3 mb-4">
+    <!-- Donut: Project Status -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart text-primary me-2"></i> Execution Status Distribution</h6>
+          <span class="badge bg-light text-secondary border">Total {{ kpis.total_projects }}</span>
+        </div>
+        <div class="chart-container d-flex align-items-center justify-content-center">
+          <canvas id="statusDonutChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar: Risk Tier Distribution -->
+    <div class="col-lg-7 col-xl-8">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart text-primary me-2"></i> Scored Projects by Risk Tier (0-100 Scale)</h6>
+          <span class="badge bg-light text-secondary border">4 Tiers</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="riskTierBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: State-wise Projects & Expenditure -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-map text-primary me-2"></i> State-wise Project Outlays and Risk Distribution</h6>
+            <div class="text-muted small">Comparative view across parliamentary states</div>
+          </div>
+          <a href="{{ url_for('views.geo') }}" class="btn btn-sm btn-outline-secondary">
+            Deep-dive Geospatial <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        <div class="chart-container-tall">
+          <canvas id="stateProjectsBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operational Alerts Summary Table -->
+  <div class="card border shadow-sm rounded-4 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-bell-fill text-danger"></i>
+        <h6 class="fw-bold text-dark mb-0">High & Critical Risk Works Requiring Verification</h6>
+      </div>
+      <a href="{{ url_for('views.alerts_view') }}" class="btn btn-sm btn-primary">
+        Manage Alert Triage ({{ kpis.high_critical_risk_count }}) <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Work ID</th>
+            <th>MP & Constituency</th>
+            <th>State / District</th>
+            <th>Category</th>
+            <th>Sanction / Spend</th>
+            <th>Risk Score</th>
+            <th>Level</th>
+            <th>Primary Indicator</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in top_flagged_projects %}
+          <tr>
+            <td>
+              <a href="{{ url_for('views.project_detail', work_id=p.work_id) }}" class="fw-bold text-decoration-none text-primary">
+                {{ p.work_id }}
+              </a>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ p.mp_name }}</div>
+              <div class="text-muted small">{{ p.constituency }}</div>
+            </td>
+            <td>
+              <div>{{ p.state }}</div>
+              <div class="text-muted small">{{ p.district }}</div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ p.work_category }}</span>
+            </td>
+            <td>
+              <div>₹{{ p.sanctioned_amount }}L</div>
+              <div class="text-muted small">Spent: ₹{{ p.expenditure }}L</div>
+            </td>
+            <td>
+              <div class="fw-bold fs-6">{{ p.risk_score }}</div>
+            </td>
+            <td>
+              <span class="badge badge-risk-{{ p.risk_level | lower }}">{{ p.risk_level }}</span>
+            </td>
+            <td style="max-width: 280px;">
+              <div class="small text-truncate" title="{{ p.primary_reason }}">
+                {{ p.primary_reason }}
+              </div>
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-danger" title="Risk Dossier">
+                <i class="bi bi-search"></i> Inspect
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if has_data %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // 1. Status Donut Chart
+  const statusCtx = document.getElementById("statusDonutChart");
+  if (statusCtx) {
+    new Chart(statusCtx, {
+      type: "doughnut",
+      data: {
+        labels: ["Completed", "Ongoing", "Delayed", "Pending"],
+        datasets: [{
+          data: [
+            {{ kpis.completed_count }},
+            {{ kpis.ongoing_count }},
+            {{ kpis.delayed_count }},
+            {{ kpis.pending_count }}
+          ],
+          backgroundColor: ["#0284C7", "#10B981", "#EF4444", "#94A3B8"],
+          borderWidth: 2,
+          borderColor: "#FFFFFF"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } }
+        },
+        cutout: "68%"
+      }
+    });
+  }
+
+  // 2. Risk Tier Bar Chart
+  const riskCtx = document.getElementById("riskTierBarChart");
+  if (riskCtx) {
+    new Chart(riskCtx, {
+      type: "bar",
+      data: {
+        labels: ["Low Risk (0-39)", "Medium Risk (40-59)", "High Risk (60-79)", "Critical Risk (80-100)"],
+        datasets: [{
+          label: "Number of Projects",
+          data: [
+            {{ risk_tier_counts.Low | default(0) }},
+            {{ risk_tier_counts.Medium | default(0) }},
+            {{ risk_tier_counts.High | default(0) }},
+            {{ risk_tier_counts.Critical | default(0) }}
+          ],
+          backgroundColor: ["#22C55E", "#EAB308", "#F97316", "#EF4444"],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: "#F1F5F9" } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // 3. State-wise Bar Chart
+  const stateCtx = document.getElementById("stateProjectsBarChart");
+  if (stateCtx) {
+    new Chart(stateCtx, {
+      type: "bar",
+      data: {
+        labels: {{ state_chart_data.labels | tojson }},
+        datasets: [
+          {
+            label: "Total Projects",
+            data: {{ state_chart_data.total_projects | tojson }},
+            backgroundColor: "#3B82F6",
+            borderRadius: 4
+          },
+          {
+            label: "High/Critical Risk Works",
+            data: {{ state_chart_data.risk_projects | tojson }},
+            backgroundColor: "#EF4444",
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "top", labels: { boxWidth: 12 } }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: "#F1F5F9" } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endif %}
+{% endblock %}
