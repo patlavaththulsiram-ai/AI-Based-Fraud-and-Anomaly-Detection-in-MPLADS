@@ -134,9 +134,9 @@
               <span class="badge badge-risk-{{ p.risk_level | lower }}">{{ p.risk_level }}</span>
             </td>
             <td style="max-width: 250px;">
-              {% if p.risk_reasons %}
-              <div class="small text-truncate text-secondary" title="{{ p.risk_reasons[0] }}">
-                {{ p.risk_reasons[0] }}
+              {% if p.top_risk_drivers %}
+              <div class="small text-truncate text-secondary" title="{{ p.top_risk_drivers[0] }}">
+                {{ p.top_risk_drivers[0] }}
               </div>
               {% endif %}
             </td>

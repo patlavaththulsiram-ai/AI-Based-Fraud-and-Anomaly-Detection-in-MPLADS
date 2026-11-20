@@ -4,271 +4,302 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MPLADS AI - Data Anomaly and Fraud Risk Detection System{% endblock %}</title>
-  
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <!-- Chart.js 4 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-  
+
   <!-- Custom Project Styles -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body>
-  <div class="d-flex" style="min-height: 100vh;">
-    <!-- Sidebar Navigation -->
-    <nav id="sidebar">
-      <div class="brand-header d-flex align-items-center justify-content-between">
-        <a href="{{ url_for('views.dashboard') }}" class="d-flex align-items-center text-white text-decoration-none">
-          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI Logo" width="34" height="34" class="me-2">
-          <div>
-            <div class="fw-bold tracking-tight" style="font-size: 1.05rem; letter-spacing: -0.02em;">MPLADS AI</div>
-            <div class="text-white-50" style="font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase;">Sentinel Audit Suite</div>
-          </div>
-        </a>
+
+<body class="{% if active_page == 'landing' or active_page == 'login' or active_page == 'register' %}auth-page{% else %}app-page{% endif %}">
+
+{% if current_user.is_authenticated %}
+<!-- ═══════════════ AUTHENTICATED APP LAYOUT ═══════════════ -->
+<div class="app-wrapper">
+
+  <!-- ── SIDEBAR ── -->
+  <nav id="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-logo">
+        <i class="bi bi-buildings-fill"></i>
       </div>
-
-      <div class="flex-grow-1 overflow-y-auto py-2" style="max-height: calc(100vh - 120px);">
-        <!-- MAIN -->
-        <div class="sidebar-heading">Executive Overview</div>
-        <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('views.dashboard') }}">
-              <i class="bi bi-speedometer2"></i> Dashboard
-            </a>
-          </li>
-        </ul>
-
-        <!-- DATA MANAGEMENT -->
-        <div class="sidebar-heading">Data Management</div>
-        <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'upload' %}active{% endif %}" href="{{ url_for('views.upload') }}">
-              <i class="bi bi-cloud-arrow-up"></i> Data Ingestion
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'validate' %}active{% endif %}" href="{{ url_for('views.validate_view') }}">
-              <i class="bi bi-clipboard-check"></i> Validation Audit
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'clean' %}active{% endif %}" href="{{ url_for('views.clean_view') }}">
-              <i class="bi bi-magic"></i> Data Cleaning Log
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'quality' %}active{% endif %}" href="{{ url_for('views.quality_view') }}">
-              <i class="bi bi-shield-check"></i> Quality Score
-            </a>
-          </li>
-        </ul>
-
-        <!-- ANALYTICS -->
-        <div class="sidebar-heading">Audit Analytics</div>
-        <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'eda' %}active{% endif %}" href="{{ url_for('views.eda') }}">
-              <i class="bi bi-bar-chart-steps"></i> Exploratory EDA
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'financial' %}active{% endif %}" href="{{ url_for('views.financial') }}">
-              <i class="bi bi-cash-stack"></i> Financial Flows
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'efficiency' %}active{% endif %}" href="{{ url_for('views.efficiency') }}">
-              <i class="bi bi-hourglass-split"></i> Inefficiencies & Delays
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'cost_overrun' %}active{% endif %}" href="{{ url_for('views.cost_overrun') }}">
-              <i class="bi bi-graph-up-arrow"></i> Cost Overruns
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'geo' %}active{% endif %}" href="{{ url_for('views.geo') }}">
-              <i class="bi bi-geo-alt"></i> Geographic Hotspots
-            </a>
-          </li>
-        </ul>
-
-        <!-- RISK & FRAUD DETECTION -->
-        <div class="sidebar-heading">Risk & ML Detection</div>
-        <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'rules' %}active{% endif %}" href="{{ url_for('views.rules_view') }}">
-              <i class="bi bi-sliders"></i> Rule Engine (8 Rules)
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'ml_detection' %}active{% endif %}" href="{{ url_for('views.ml_detection') }}">
-              <i class="bi bi-cpu"></i> ML Detection Suite
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'duplicates' %}active{% endif %}" href="{{ url_for('views.duplicates_view') }}">
-              <i class="bi bi-copy"></i> Duplicate Works
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'risk' %}active{% endif %}" href="{{ url_for('views.risk_list') }}">
-              <i class="bi bi-shield-exclamation"></i> Master Risk Register
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'alerts' %}active{% endif %}" href="{{ url_for('views.alerts_view') }}">
-              <i class="bi bi-bell"></i> Operational Alerts
-            </a>
-          </li>
-        </ul>
-
-        <!-- REPORTING & INTEGRATION -->
-        <div class="sidebar-heading">Reports & BI</div>
-        <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'powerbi' %}active{% endif %}" href="{{ url_for('views.powerbi_view') }}">
-              <i class="bi bi-pie-chart-fill"></i> Power BI Embedded
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'reports' %}active{% endif %}" href="{{ url_for('views.reports_view') }}">
-              <i class="bi bi-file-earmark-pdf"></i> Audit PDF Reports
-            </a>
-          </li>
-        </ul>
-
-        <!-- SYSTEM -->
-        <div class="sidebar-heading">Administration</div>
-        <ul class="nav flex-column mb-3">
-          <li class="nav-item">
-            <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('views.settings_view') }}">
-              <i class="bi bi-gear"></i> System Settings
-            </a>
-          </li>
-        </ul>
+      <div class="sidebar-brand-text">
+        <div class="sidebar-brand-name">MPLADS <span>AI</span></div>
+        <div class="sidebar-brand-sub">Ministry of Statistics &amp; Programme Implementation</div>
       </div>
+    </div>
 
-      <!-- User Role Profile footer in sidebar -->
-      {% if current_user.is_authenticated %}
-      <div class="p-3 border-top border-secondary-subtle bg-black bg-opacity-25 d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center text-truncate me-2">
-          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.85rem; font-weight: 600;">
-            {{ current_user.username[0].upper() }}
-          </div>
-          <div class="text-truncate">
-            <div class="text-white text-truncate fw-semibold" style="font-size: 0.82rem;">{{ current_user.full_name }}</div>
-            <div class="text-white-50 text-truncate" style="font-size: 0.7rem;">Role: {{ current_user.role.title() }}</div>
-          </div>
-        </div>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-light py-0 px-2" title="Sign Out">
-          <i class="bi bi-box-arrow-right"></i>
-        </a>
-      </div>
+    <!-- Scrollable nav -->
+    <div class="sidebar-nav">
+
+      <div class="sidebar-section">Dashboard</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('views.dashboard') }}">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+          </a>
+        </li>
+      </ul>
+
+      {% if current_user.is_authenticated and current_user.is_admin() %}
+      <div class="sidebar-section">Data Management</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'dataset_management' %}active{% endif %}" href="{{ url_for('views.dataset_management') }}">
+            <i class="bi bi-folder2-open"></i><span>Dataset Management</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'upload' %}active{% endif %}" href="{{ url_for('views.upload') }}">
+            <i class="bi bi-cloud-arrow-up"></i><span>Data Ingestion</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'validate' %}active{% endif %}" href="{{ url_for('views.validate_view') }}">
+            <i class="bi bi-clipboard-check"></i><span>Validation Audit</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'clean' %}active{% endif %}" href="{{ url_for('views.clean_view') }}">
+            <i class="bi bi-magic"></i><span>Data Cleaning Log</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'quality' %}active{% endif %}" href="{{ url_for('views.quality_view') }}">
+            <i class="bi bi-shield-check"></i><span>Quality Score</span>
+          </a>
+        </li>
+      </ul>
       {% endif %}
-    </nav>
 
-    <!-- Main Content Area -->
-    <div id="content-wrapper">
-      <!-- Top Navbar -->
-      <header class="topbar d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center">
-          <button class="btn btn-sm btn-outline-secondary d-md-none me-2" id="sidebarToggle" aria-label="Toggle Sidebar">
-            <i class="bi bi-list fs-5"></i>
-          </button>
-          
-          <!-- Global Search Input -->
-          <div class="input-group input-group-sm" style="width: 340px;">
-            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="globalSearchInput" class="form-control border-start-0 bg-light" placeholder="Search Work ID, MP, District, Category..." aria-label="Search">
-          </div>
-        </div>
+      <div class="sidebar-section">Analytics</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'eda' %}active{% endif %}" href="{{ url_for('views.eda') }}">
+            <i class="bi bi-bar-chart-steps"></i><span>Exploratory EDA</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'financial' %}active{% endif %}" href="{{ url_for('views.financial') }}">
+            <i class="bi bi-cash-stack"></i><span>Financial Flows</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'efficiency' %}active{% endif %}" href="{{ url_for('views.efficiency') }}">
+            <i class="bi bi-hourglass-split"></i><span>Efficiency &amp; Delays</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'cost_overrun' %}active{% endif %}" href="{{ url_for('views.cost_overrun') }}">
+            <i class="bi bi-graph-up-arrow"></i><span>Cost Overruns</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'geo' %}active{% endif %}" href="{{ url_for('views.geo') }}">
+            <i class="bi bi-geo-alt"></i><span>Geographic Hotspots</span>
+          </a>
+        </li>
+      </ul>
 
-        <div class="d-flex align-items-center gap-3">
-          <!-- Active Data Source Badge -->
-          <div class="data-source-badge {% if data_source == 'Synthetic' %}source-synthetic{% else %}source-uploaded{% endif %} d-none d-sm-inline-flex align-items-center">
-            <i class="bi bi-database me-1"></i> Data Source: {{ data_source | default('Synthetic') }}
-          </div>
-
-          <!-- Alert Notifications Link -->
-          <a href="{{ url_for('views.alerts_view') }}" class="btn btn-sm btn-light border position-relative" title="Critical Risk Alerts">
-            <i class="bi bi-bell text-secondary"></i>
+      <div class="sidebar-section">Risk &amp; Alerts</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'rules' %}active{% endif %}" href="{{ url_for('views.rules_view') }}">
+            <i class="bi bi-sliders"></i><span>Rule Engine</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'ml_detection' %}active{% endif %}" href="{{ url_for('views.ml_detection') }}">
+            <i class="bi bi-cpu"></i><span>ML Detection Suite</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'duplicates' %}active{% endif %}" href="{{ url_for('views.duplicates_view') }}">
+            <i class="bi bi-copy"></i><span>Duplicate Works</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'risk' %}active{% endif %}" href="{{ url_for('views.risk_list') }}">
+            <i class="bi bi-shield-exclamation"></i><span>Risk Register</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'alerts' %}active{% endif %}" href="{{ url_for('views.alerts_view') }}">
+            <i class="bi bi-bell"></i>
+            <span>Alerts</span>
             {% if critical_alerts_count and critical_alerts_count > 0 %}
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-              {{ critical_alerts_count }}
-            </span>
+            <span class="sidebar-badge">{{ critical_alerts_count }}</span>
             {% endif %}
           </a>
+        </li>
+      </ul>
 
-          <!-- User Menu Dropdown -->
-          {% if current_user.is_authenticated %}
-          <div class="dropdown">
-            <button class="btn btn-sm btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="badge bg-primary text-capitalize">{{ current_user.role }}</span>
-              <span class="d-none d-md-inline fw-semibold" style="font-size: 0.85rem;">{{ current_user.username }}</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.85rem;">
-              <li><h6 class="dropdown-header">{{ current_user.full_name }}</h6></li>
-              <li><span class="dropdown-item-text text-muted">{{ current_user.email }}</span></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{{ url_for('views.settings_view') }}"><i class="bi bi-gear me-2"></i> Settings</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
-            </ul>
-          </div>
-          {% else %}
-          <div class="d-flex gap-2">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline-primary">Sign In</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary">Register</a>
-          </div>
-          {% endif %}
-        </div>
-      </header>
+      <div class="sidebar-section">Reports</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'visualizations' %}active{% endif %}" href="{{ url_for('views.visualizations') }}">
+            <i class="bi bi-pie-chart-fill"></i><span>Visualizations</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'reports' %}active{% endif %}" href="{{ url_for('views.reports_view') }}">
+            <i class="bi bi-file-earmark-pdf"></i><span>Audit Reports</span>
+          </a>
+        </li>
+      </ul>
 
-      <!-- Flash Alert Messages -->
-      <div class="container-fluid px-4 pt-3">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm py-2 px-3" role="alert" style="font-size: 0.9rem;">
-                <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+      <div class="sidebar-section">Administration</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="sidebar-link {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('views.settings_view') }}">
+            <i class="bi bi-gear"></i><span>{% if current_user.is_admin() %}System Settings{% else %}User Settings{% endif %}</span>
+          </a>
+        </li>
+      </ul>
+
+    </div><!-- /sidebar-nav -->
+
+    <!-- User profile at bottom -->
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">{{ current_user.username[0].upper() }}</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ current_user.full_name }}</div>
+        <div class="sidebar-user-role">{{ current_user.role.title() }}</div>
       </div>
-
-      <!-- Main Page Content Slot -->
-      <main class="flex-grow-1 px-4 py-3">
-        {% block content %}{% endblock %}
-      </main>
-
-      <!-- Academic Project Disclaimer Footer (Mandatory Requirement) -->
-      <footer class="app-footer mt-auto">
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <span class="prototype-tag">Prototype - Academic Project (B.Tech CSE Data Science)</span>
-            <span class="d-none d-lg-inline text-muted">|</span>
-            <span class="text-secondary small d-none d-lg-inline">Development of an AI-Powered System to Detect Anomalies, Fraud, and Inefficiencies in the Implementation of the Members of Parliament Local Area Development Scheme (MPLADS)</span>
-          </div>
-          <div class="text-muted small">
-            <span>Audit Pipeline v1.0 &bull; Non-Governmental Prototype</span>
-          </div>
-        </div>
-      </footer>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-logout" title="Sign Out">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
     </div>
-  </div>
+  </nav><!-- /sidebar -->
 
-  <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Custom Application Scripts -->
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  {% block extra_scripts %}{% endblock %}
+  <!-- ── CONTENT AREA ── -->
+  <div id="content-wrapper">
+
+    <!-- TOP BAR -->
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="topbar-toggle d-md-none" id="sidebarToggle" aria-label="Toggle Sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-search">
+          <i class="bi bi-search topbar-search-icon"></i>
+          <input type="text" id="globalSearchInput" placeholder="Search projects, states, districts..." class="topbar-search-input">
+        </div>
+      </div>
+      <div class="topbar-right">
+        <!-- Alerts bell -->
+        <a href="{{ url_for('views.alerts_view') }}" class="topbar-icon-btn" title="Alerts">
+          <i class="bi bi-bell"></i>
+          {% if critical_alerts_count and critical_alerts_count > 0 %}
+          <span class="topbar-badge">{{ critical_alerts_count }}</span>
+          {% endif %}
+        </a>
+        <!-- User dropdown -->
+        <div class="dropdown">
+          <button class="topbar-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <span class="topbar-user-role-badge {% if current_user.is_admin() %}bg-danger text-white{% else %}bg-primary text-white{% endif %}">{{ current_user.role | title }}</span>
+            <span class="topbar-user-avatar">{{ current_user.username[0].upper() }}</span>
+            <span class="topbar-username d-none d-md-inline">{{ current_user.username }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow">
+            <li><h6 class="dropdown-header">{{ current_user.full_name }}</h6></li>
+            <li><span class="dropdown-item-text text-muted small">{{ current_user.email }}</span></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('views.select_dataset') }}"><i class="bi bi-database me-2"></i>Switch Dataset</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('views.settings_view') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </header><!-- /topbar -->
+
+    <!-- Flash messages -->
+    <div class="px-4 pt-3">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm py-2 px-3 mb-2" role="alert" style="font-size:0.88rem;">
+              <i class="bi {% if category=='success' %}bi-check-circle-fill{% elif category=='danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+              {{ message }}
+              <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Main content -->
+    <main class="app-content">
+{% else %}
+<!-- ═══════════════ UNAUTHENTICATED LAYOUT ═══════════════ -->
+<div class="d-flex flex-column min-vh-100">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;width:min(96%,600px);">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow py-2 px-3 mb-2" role="alert" style="font-size:0.88rem;">
+          <i class="bi {% if category=='success' %}bi-check-circle-fill{% elif category=='danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+          {{ message }}
+          <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="flex-grow-1{% if active_page != 'landing' %} d-flex align-items-center justify-content-center{% endif %}"{% if active_page != 'landing' %} style="background:linear-gradient(135deg,#f0f4ff 0%,#e8edf8 100%);min-height:100vh;"{% endif %}>
+{% endif %}
+
+      {% block content %}{% endblock %}
+
+{% if current_user.is_authenticated %}
+    </main>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <span class="footer-tag">MPLADS AI</span>
+      <span class="text-muted small">Government of India</span>
+    </footer>
+
+  </div><!-- /content-wrapper -->
+</div><!-- /app-wrapper -->
+{% else %}
+  </main>
+</div>
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<script>
+  // Sidebar toggle for mobile
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
+  }
+  // Close sidebar on outside click (mobile)
+  document.addEventListener('click', (e) => {
+    if (sidebar && window.innerWidth < 768) {
+      if (!sidebar.contains(e.target) && !sidebarToggle?.contains(e.target)) {
+        sidebar.classList.remove('sidebar-open');
+      }
+    }
+  });
+</script>
+
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

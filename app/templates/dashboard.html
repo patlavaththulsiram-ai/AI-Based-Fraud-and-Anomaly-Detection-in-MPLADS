@@ -5,15 +5,16 @@
 
 {% block content %}
 <div class="container-fluid">
+
   <!-- Page Header -->
-  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-2 border-bottom">
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
     <div>
-      <h3 class="fw-bold text-dark mb-1">Executive Audit Dashboard</h3>
+      <h4 class="fw-bold text-dark mb-1">Executive Audit Dashboard</h4>
       <p class="text-muted small mb-0">System-wide monitoring of MPLADS fund allocations, execution velocity, and fraud-risk signals</p>
     </div>
     <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
       {% if has_data %}
-      <span class="badge bg-light text-secondary border px-3 py-2">
+      <span class="badge bg-white text-secondary border px-3 py-2 shadow-sm">
         <i class="bi bi-clock-history me-1"></i> Cached: {{ cache_timestamp }}
       </span>
       <a href="{{ url_for('views.reports_view') }}" class="btn btn-sm btn-outline-primary fw-semibold">
@@ -27,10 +28,10 @@
   </div>
 
   {% if not has_data %}
-  <!-- Empty State Banner (Never show hardcoded fake numbers) -->
-  <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-4 bg-white mb-4">
+  <!-- Empty State Banner -->
+  <div class="card border-0 shadow-sm rounded-3 text-center py-5 px-4 bg-white mb-4">
     <div class="py-5">
-      <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width: 80px; height: 80px;">
+      <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width:80px;height:80px;">
         <i class="bi bi-database-exclamation fs-1"></i>
       </div>
       <h4 class="fw-bold text-dark mb-2">No MPLADS Project Dataset Loaded</h4>
@@ -49,247 +50,271 @@
   </div>
   {% else %}
 
-  <!-- 8 KPI Cards Grid -->
-  <div class="row g-3 mb-4">
+  <!-- ═══════════════════════════════════════════════════════════
+       ROW 1 — KPI Cards 1-4
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="row g-3 mb-3">
+
     <!-- KPI 1: Total Projects -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Total Projects Audited</span>
-          <div class="kpi-icon-box bg-primary-subtle text-primary">
-            <i class="bi bi-folder2"></i>
+      <div class="card stat-card stat-card-blue h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-blue-light">
+            <i class="bi bi-folder2-open text-primary fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-dark">{{ kpis.total_projects | default(0) }}</div>
-        <div class="small text-muted mt-1">
-          <span class="badge bg-light text-secondary border">100% Schema Valid</span>
+          <div>
+            <div class="kpi-number">{{ kpis.total_projects | default(0) }}</div>
+            <div class="kpi-label">Total Projects</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- KPI 2: Total Funds Sanctioned -->
+    <!-- KPI 2: Total Funds -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Total Funds Sanctioned</span>
-          <div class="kpi-icon-box bg-success-subtle text-success">
-            <i class="bi bi-currency-rupee"></i>
+      <div class="card stat-card stat-card-green h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-green-light">
+            <i class="bi bi-currency-rupee text-success fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-dark">₹{{ kpis.total_funds_crores | default('0.00') }} <span class="fs-6 text-muted">Cr</span></div>
-        <div class="small text-muted mt-1">
-          Disbursed: ₹{{ kpis.total_expenditure_crores | default('0.00') }} Cr
+          <div>
+            <div class="kpi-number">₹{{ kpis.total_funds_crores | default('0.00') }} <span class="fs-6 fw-normal text-muted">Cr</span></div>
+            <div class="kpi-label">Total Funds (₹ Cr)</div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- KPI 3: Completed Projects -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Completed Works</span>
-          <div class="kpi-icon-box bg-info-subtle text-info">
-            <i class="bi bi-check2-circle"></i>
+      <div class="card stat-card stat-card-teal h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-teal-light">
+            <i class="bi bi-check2-circle text-info fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-dark">{{ kpis.completed_count | default(0) }}</div>
-        <div class="small text-muted mt-1">
-          <span class="badge bg-info-subtle text-info border">{{ kpis.completed_pct | default('0.0') }}% Completion Rate</span>
+          <div>
+            <div class="kpi-number">{{ kpis.completed_count | default(0) }}</div>
+            <div class="kpi-label">Completed Projects</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- KPI 4: High & Critical Risk -->
+    <!-- KPI 4: High-Risk Projects -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">High & Critical Risk</span>
-          <div class="kpi-icon-box bg-danger-subtle text-danger">
-            <i class="bi bi-shield-alert"></i>
+      <div class="card stat-card stat-card-red h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-red-light">
+            <i class="bi bi-shield-exclamation text-danger fs-4"></i>
+          </div>
+          <div>
+            <div class="kpi-number text-danger">{{ kpis.high_critical_risk_count | default(0) }}</div>
+            <div class="kpi-label">High-Risk Projects</div>
           </div>
         </div>
-        <div class="kpi-val text-danger">{{ kpis.high_critical_risk_count | default(0) }}</div>
-        <div class="small text-muted mt-1">
-          <span class="badge bg-danger-subtle text-danger border">{{ kpis.high_critical_risk_pct | default('0.0') }}% Requiring Review</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ROW 2 — KPI Cards 5-8
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="row g-3 mb-4">
+
+    <!-- KPI 5: Pending Projects -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stat-card stat-card-orange h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-orange-light">
+            <i class="bi bi-hourglass-bottom text-warning fs-4"></i>
+          </div>
+          <div>
+            <div class="kpi-number text-warning">{{ kpis.pending_count | default(0) }}</div>
+            <div class="kpi-label">Pending Projects</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- KPI 5: Pending & Delayed Projects -->
+    <!-- KPI 6: Avg Delayed Days -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Pending / Delayed</span>
-          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
-            <i class="bi bi-hourglass-bottom"></i>
+      <div class="card stat-card stat-card-gray h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-gray-light">
+            <i class="bi bi-calendar-x text-secondary fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-warning-emphasis">{{ kpis.delayed_pending_count | default(0) }}</div>
-        <div class="small text-muted mt-1">
-          Delayed: {{ kpis.delayed_count | default(0) }} | Pending: {{ kpis.pending_count | default(0) }}
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI 6: Average Delay -->
-    <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Average Completion Delay</span>
-          <div class="kpi-icon-box bg-secondary-subtle text-secondary">
-            <i class="bi bi-calendar-x"></i>
+          <div>
+            <div class="kpi-number">{{ kpis.avg_delay_days | default(0) }} <span class="fs-6 fw-normal text-muted">Days</span></div>
+            <div class="kpi-label">Avg Delayed Days</div>
           </div>
-        </div>
-        <div class="kpi-val text-dark">{{ kpis.avg_delay_days | default(0) }} <span class="fs-6 text-muted">Days</span></div>
-        <div class="small text-muted mt-1">
-          Max Delay: {{ kpis.max_delay_days | default(0) }} days
         </div>
       </div>
     </div>
 
     <!-- KPI 7: Utilization Rate -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Sanction Utilization</span>
-          <div class="kpi-icon-box bg-primary-subtle text-primary">
-            <i class="bi bi-percent"></i>
+      <div class="card stat-card stat-card-blue h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-blue-light">
+            <i class="bi bi-percent text-primary fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-dark">{{ kpis.utilization_rate_pct | default('0.0') }}%</div>
-        <div class="small text-muted mt-1">
-          Spend-Progress Gap: {{ kpis.avg_spend_progress_gap | default('0.0') }}%
+          <div>
+            <div class="kpi-number">{{ kpis.utilization_rate_pct | default('0.0') }}%</div>
+            <div class="kpi-label">Utilization Rate %</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- KPI 8: Average System Risk Score -->
+    <!-- KPI 8: Avg Risk Score -->
     <div class="col-sm-6 col-xl-3">
-      <div class="card card-stat p-3 h-100">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="kpi-label">Mean Composite Risk</span>
-          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
-            <i class="bi bi-speedometer"></i>
+      <div class="card stat-card stat-card-red h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="kpi-icon bg-red-light">
+            <i class="bi bi-speedometer2 text-danger fs-4"></i>
           </div>
-        </div>
-        <div class="kpi-val text-dark">{{ kpis.avg_risk_score | default('0.0') }} <span class="fs-6 text-muted">/100</span></div>
-        <div class="small text-muted mt-1">
-          Tier: <span class="badge badge-risk-{{ kpis.avg_risk_tier | lower }}">{{ kpis.avg_risk_tier }}</span>
+          <div>
+            <div class="kpi-number">{{ kpis.avg_risk_score | default('0.0') }}<span class="fs-6 fw-normal text-muted">/100</span></div>
+            <div class="kpi-label">Avg Risk Score &nbsp;<span class="badge badge-risk-{{ kpis.avg_risk_tier | lower }}">{{ kpis.avg_risk_tier }}</span></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts Row 1: Status Donut & Risk Tier Distribution -->
+  <!-- ═══════════════════════════════════════════════════════════
+       ROW 3 — 3 Charts side by side
+  ════════════════════════════════════════════════════════════════ -->
   <div class="row g-3 mb-4">
-    <!-- Donut: Project Status -->
-    <div class="col-lg-5 col-xl-4">
-      <div class="card border shadow-sm rounded-4 p-3 bg-white h-100">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart text-primary me-2"></i> Execution Status Distribution</h6>
+
+    <!-- Left: Status Donut -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+        <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Project Status</h6>
           <span class="badge bg-light text-secondary border">Total {{ kpis.total_projects }}</span>
         </div>
-        <div class="chart-container d-flex align-items-center justify-content-center">
-          <canvas id="statusDonutChart"></canvas>
+        <div class="card-body d-flex flex-column align-items-center justify-content-center p-3">
+          <div style="position:relative;height:200px;width:100%;">
+            <canvas id="statusDonutChart"></canvas>
+          </div>
+          <!-- Legend -->
+          <div class="mt-3 w-100">
+            <div class="row g-1 text-center small">
+              <div class="col-6 d-flex align-items-center gap-1 ps-3">
+                <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#0284C7;flex-shrink:0;"></span>
+                <span class="text-muted">Completed <strong>{{ kpis.completed_count }}</strong></span>
+              </div>
+              <div class="col-6 d-flex align-items-center gap-1">
+                <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#10B981;flex-shrink:0;"></span>
+                <span class="text-muted">Ongoing <strong>{{ kpis.ongoing_count }}</strong></span>
+              </div>
+              <div class="col-6 d-flex align-items-center gap-1 ps-3">
+                <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#EF4444;flex-shrink:0;"></span>
+                <span class="text-muted">Delayed <strong>{{ kpis.delayed_count }}</strong></span>
+              </div>
+              <div class="col-6 d-flex align-items-center gap-1">
+                <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#94A3B8;flex-shrink:0;"></span>
+                <span class="text-muted">Pending <strong>{{ kpis.pending_count }}</strong></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Bar: Risk Tier Distribution -->
-    <div class="col-lg-7 col-xl-8">
-      <div class="card border shadow-sm rounded-4 p-3 bg-white h-100">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart text-primary me-2"></i> Scored Projects by Risk Tier (0-100 Scale)</h6>
+    <!-- Middle: Risk Distribution Bar -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+        <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Risk Distribution</h6>
           <span class="badge bg-light text-secondary border">4 Tiers</span>
         </div>
-        <div class="chart-container">
-          <canvas id="riskTierBarChart"></canvas>
+        <div class="card-body p-3">
+          <div style="position:relative;height:240px;">
+            <canvas id="riskTierBarChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Charts Row 2: State-wise Projects & Expenditure -->
-  <div class="row g-3 mb-4">
-    <div class="col-12">
-      <div class="card border shadow-sm rounded-4 p-3 bg-white">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <div>
-            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-map text-primary me-2"></i> State-wise Project Outlays and Risk Distribution</h6>
-            <div class="text-muted small">Comparative view across parliamentary states</div>
-          </div>
+    <!-- Right: State-wise Projects Bar -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white h-100">
+        <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+          <h6 class="fw-bold text-dark mb-0"><i class="bi bi-map-fill text-primary me-2"></i>State-wise Projects</h6>
           <a href="{{ url_for('views.geo') }}" class="btn btn-sm btn-outline-secondary">
-            Deep-dive Geospatial <i class="bi bi-arrow-right"></i>
+            Geospatial <i class="bi bi-arrow-right"></i>
           </a>
         </div>
-        <div class="chart-container-tall">
-          <canvas id="stateProjectsBarChart"></canvas>
+        <div class="card-body p-3">
+          <div style="position:relative;height:240px;">
+            <canvas id="stateProjectsBarChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Operational Alerts Summary Table -->
-  <div class="card border shadow-sm rounded-4 bg-white mb-4">
-    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+  <!-- ═══════════════════════════════════════════════════════════
+       ROW 4 — High Risk Projects Table
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-bell-fill text-danger"></i>
-        <h6 class="fw-bold text-dark mb-0">High & Critical Risk Works Requiring Verification</h6>
+        <h6 class="fw-bold text-dark mb-0">High &amp; Critical Risk Works Requiring Verification</h6>
       </div>
       <a href="{{ url_for('views.alerts_view') }}" class="btn btn-sm btn-primary">
         Manage Alert Triage ({{ kpis.high_critical_risk_count }}) <i class="bi bi-arrow-right"></i>
       </a>
     </div>
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead>
+      <table class="table table-striped table-bordered table-hover align-middle mb-0 small">
+        <thead class="table-light">
           <tr>
-            <th>Work ID</th>
-            <th>MP & Constituency</th>
+            <th class="ps-3">Work ID</th>
+            <th>MP &amp; Constituency</th>
             <th>State / District</th>
             <th>Category</th>
             <th>Sanction / Spend</th>
-            <th>Risk Score</th>
-            <th>Level</th>
+            <th class="text-center">Risk Score</th>
+            <th class="text-center">Level</th>
             <th>Primary Indicator</th>
-            <th class="text-end">Actions</th>
+            <th class="text-end pe-3">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% for p in top_flagged_projects %}
+          {% for p in top_critical_projects %}
           <tr>
-            <td>
+            <td class="ps-3">
               <a href="{{ url_for('views.project_detail', work_id=p.work_id) }}" class="fw-bold text-decoration-none text-primary">
                 {{ p.work_id }}
               </a>
             </td>
             <td>
               <div class="fw-semibold">{{ p.mp_name }}</div>
-              <div class="text-muted small">{{ p.constituency }}</div>
+              <div class="text-muted">{{ p.constituency }}</div>
             </td>
             <td>
               <div>{{ p.state }}</div>
-              <div class="text-muted small">{{ p.district }}</div>
+              <div class="text-muted">{{ p.district }}</div>
             </td>
             <td>
               <span class="badge bg-light text-dark border">{{ p.work_category }}</span>
             </td>
             <td>
               <div>₹{{ p.sanctioned_amount }}L</div>
-              <div class="text-muted small">Spent: ₹{{ p.expenditure }}L</div>
+              <div class="text-muted">Spent: ₹{{ p.expenditure }}L</div>
             </td>
-            <td>
-              <div class="fw-bold fs-6">{{ p.risk_score }}</div>
-            </td>
-            <td>
+            <td class="text-center fw-bold">{{ p.risk_score }}</td>
+            <td class="text-center">
               <span class="badge badge-risk-{{ p.risk_level | lower }}">{{ p.risk_level }}</span>
             </td>
-            <td style="max-width: 280px;">
-              <div class="small text-truncate" title="{{ p.primary_reason }}">
-                {{ p.primary_reason }}
-              </div>
+            <td style="max-width:240px;">
+              <div class="text-truncate" title="{{ p.primary_reason }}">{{ p.primary_reason }}</div>
             </td>
-            <td class="text-end">
+            <td class="text-end pe-3">
               <a href="{{ url_for('views.risk_detail', work_id=p.work_id) }}" class="btn btn-sm btn-outline-danger" title="Risk Dossier">
                 <i class="bi bi-search"></i> Inspect
               </a>
@@ -300,6 +325,7 @@
       </table>
     </div>
   </div>
+
   {% endif %}
 </div>
 {% endblock %}
@@ -331,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } }
+          legend: { display: false }
         },
         cutout: "68%"
       }

@@ -5,141 +5,293 @@
 
 {% block content %}
 <div class="container-fluid">
-  <!-- Header -->
-  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+
+  <!-- Page Header -->
+  <div class="d-flex align-items-start justify-content-between mb-4">
     <div>
-      <h3 class="fw-bold text-dark mb-1">Exploratory Data Analysis (EDA)</h3>
-      <p class="text-muted small mb-0">Multivariate statistical distributions across project types, expenditure scales, and geographic regions</p>
+      <h4 class="fw-bold mb-1" style="color:#0F2044;">Exploratory Data Analysis</h4>
+      <p class="text-muted small mb-0">
+        <i class="bi bi-bar-chart-steps me-1"></i>
+        Multivariate statistical distributions across project types, expenditure scales, and geographic regions
+      </p>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('views.financial') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
-        Next: Financial Analysis <i class="bi bi-arrow-right"></i>
+    <div class="d-flex gap-2 flex-shrink-0">
+      <a href="{{ url_for('views.financial') }}" class="btn btn-sm fw-semibold text-white"
+         style="background:#1565C0; border-color:#1565C0;">
+        Financial Analysis <i class="bi bi-arrow-right ms-1"></i>
       </a>
     </div>
   </div>
 
   {% if not has_data %}
-  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
-    <h5>No dataset loaded for exploratory data analysis.</h5>
-    <div class="mt-3">
-      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+  <!-- No-data state -->
+  <div class="card border-0 shadow-sm text-center p-5 bg-white" style="border-radius:10px;">
+    <div class="mb-3">
+      <i class="bi bi-bar-chart-steps text-muted" style="font-size:3rem;"></i>
+    </div>
+    <h5 class="fw-semibold text-dark mb-2">No dataset loaded for exploratory data analysis.</h5>
+    <p class="text-muted small mb-4">Upload a CSV or load the demo dataset to begin analysis.</p>
+    <div>
+      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm px-4">
+        <i class="bi bi-cloud-download me-1"></i> Load Demo Dataset
+      </a>
     </div>
   </div>
   {% else %}
 
-  <!-- EDA Navigation Tabs -->
-  <div class="card border shadow-sm rounded-4 p-3 bg-white mb-4">
-    <ul class="nav nav-pills mb-3" id="edaTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-semibold" id="projects-tab" data-bs-toggle="pill" data-bs-target="#projects-panel" type="button" role="tab">
-          <i class="bi bi-diagram-2 me-1"></i> Projects Overview
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link fw-semibold" id="financial-tab" data-bs-toggle="pill" data-bs-target="#financial-panel" type="button" role="tab">
-          <i class="bi bi-cash-stack me-1"></i> Financial Outlays
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link fw-semibold" id="location-tab" data-bs-toggle="pill" data-bs-target="#location-panel" type="button" role="tab">
-          <i class="bi bi-geo-alt me-1"></i> Geographic Slices
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link fw-semibold" id="category-tab" data-bs-toggle="pill" data-bs-target="#category-panel" type="button" role="tab">
-          <i class="bi bi-tags me-1"></i> Sectoral Breakdown
-        </button>
-      </li>
-    </ul>
-
-    <div class="tab-content" id="edaTabContent">
-      <!-- Tab 1: Projects Overview -->
-      <div class="tab-pane fade show active" id="projects-panel" role="tabpanel">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="p-3 border rounded-3 bg-light">
-              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart me-1 text-primary"></i> Projects by Work Category</h6>
-              <div class="chart-container">
-                <canvas id="edaCategoryDoughnut"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="p-3 border rounded-3 bg-light">
-              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart me-1 text-primary"></i> Projects by Implementation Status</h6>
-              <div class="chart-container">
-                <canvas id="edaStatusBar"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 2: Financial Outlays -->
-      <div class="tab-pane fade" id="financial-panel" role="tabpanel">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="p-3 border rounded-3 bg-light">
-              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-steps me-1 text-success"></i> Expenditure Histogram (Bins in ₹ Lakhs)</h6>
-              <div class="chart-container">
-                <canvas id="edaExpHistogram"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="p-3 border rounded-3 bg-light">
-              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-arrow-left-right me-1 text-success"></i> Sanctioned vs Expenditure per Sector</h6>
-              <div class="chart-container">
-                <canvas id="edaFinCategoryBar"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 3: Geographic Slices -->
-      <div class="tab-pane fade" id="location-panel" role="tabpanel">
-        <div class="p-3 border rounded-3 bg-light">
-          <h6 class="fw-bold text-dark mb-3"><i class="bi bi-map me-1 text-primary"></i> Project Concentration Across Major States</h6>
-          <div class="chart-container-tall">
-            <canvas id="edaStateBar"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 4: Sectoral Breakdown -->
-      <div class="tab-pane fade" id="category-panel" role="tabpanel">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Sector / Category</th>
-                <th>Total Projects</th>
-                <th>Sanctioned Outlay (₹ Lakhs)</th>
-                <th>Reported Expenditure (₹ Lakhs)</th>
-                <th>Utilization Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for cat, stats in cat_fin.items() %}
-              <tr>
-                <td class="fw-bold">{{ cat }}</td>
-                <td>{{ cat_counts.get(cat, 0) }}</td>
-                <td>₹{{ stats.sanctioned | round(2) }}L</td>
-                <td>₹{{ stats.expenditure | round(2) }}L</td>
-                <td>
-                  <span class="badge bg-primary-subtle text-primary border">
-                    {{ ((stats.expenditure / stats.sanctioned)*100) | round(1) if stats.sanctioned > 0 else 0 }}%
-                  </span>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <!-- ── Tab Navigation ── -->
+  <div class="card border-0 shadow-sm mb-4" style="border-radius:10px; overflow:hidden;">
+    <div class="card-header bg-white border-bottom px-4 pt-3 pb-0">
+      <ul class="nav nav-tabs border-0" id="edaTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active fw-semibold px-4" id="projects-tab"
+                  data-bs-toggle="tab" data-bs-target="#projects-panel" type="button" role="tab">
+            <i class="bi bi-diagram-2 me-1"></i> Projects
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link fw-semibold px-4" id="financial-tab"
+                  data-bs-toggle="tab" data-bs-target="#financial-panel" type="button" role="tab">
+            <i class="bi bi-cash-stack me-1"></i> Financial
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link fw-semibold px-4" id="location-tab"
+                  data-bs-toggle="tab" data-bs-target="#location-panel" type="button" role="tab">
+            <i class="bi bi-geo-alt me-1"></i> Location
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link fw-semibold px-4" id="category-tab"
+                  data-bs-toggle="tab" data-bs-target="#category-panel" type="button" role="tab">
+            <i class="bi bi-tags me-1"></i> Category
+          </button>
+        </li>
+      </ul>
     </div>
-  </div>
+
+    <div class="tab-content bg-white px-4 py-4" id="edaTabContent">
+
+      <!-- ════════════════════ TAB 1: Projects ════════════════════ -->
+      <div class="tab-pane fade show active" id="projects-panel" role="tabpanel">
+        <div class="row g-4">
+
+          <!-- Donut: Projects by Category -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-pie-chart me-1" style="color:#1565C0;"></i> Projects by Work Category
+                </h6>
+                <p class="text-muted small mb-3">Distribution of projects across infrastructure sectors</p>
+                <div style="position:relative; height:280px;">
+                  <canvas id="edaCategoryDoughnut"></canvas>
+                </div>
+                <!-- Donut total label -->
+                <div class="text-center mt-3">
+                  <span class="text-muted small">Total Projects: </span>
+                  <strong class="fs-5" style="color:#1565C0;">
+                    {{ cat_counts.values() | list | sum }}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category % breakdown list -->
+          <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-list-ul me-1" style="color:#1565C0;"></i> Category Breakdown
+                </h6>
+                <p class="text-muted small mb-3">Share of each sector in total project portfolio</p>
+                {% set total_cat = cat_counts.values() | list | sum %}
+                <div class="d-flex flex-column gap-2">
+                  {% for cat, cnt in cat_counts.items() %}
+                  {% set pct = ((cnt / total_cat) * 100) | round(1) if total_cat > 0 else 0 %}
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="small fw-semibold text-dark">{{ cat }}</span>
+                      <span class="small text-muted">{{ cnt }} &nbsp;<span class="badge bg-primary-subtle text-primary border" style="font-size:0.72rem;">{{ pct }}%</span></span>
+                    </div>
+                    <div class="progress" style="height:7px; border-radius:4px;">
+                      <div class="progress-bar" role="progressbar"
+                           style="width:{{ pct }}%; background:#1565C0; border-radius:4px;"
+                           aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Status Bar Chart (full-width) -->
+          <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-bar-chart me-1" style="color:#1565C0;"></i> Project Status Distribution
+                </h6>
+                <p class="text-muted small mb-3">Count of projects by implementation status</p>
+                <div style="position:relative; height:220px;">
+                  <canvas id="edaStatusBar"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ TAB 2: Financial ════════════════════ -->
+      <div class="tab-pane fade" id="financial-panel" role="tabpanel">
+        <div class="row g-4">
+
+          <!-- Expenditure Histogram -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-bar-chart-steps me-1" style="color:#28a745;"></i> Expenditure Distribution
+                </h6>
+                <p class="text-muted small mb-3">Histogram of project expenditure bins (₹ Lakhs)</p>
+                <div style="position:relative; height:280px;">
+                  <canvas id="edaExpHistogram"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sanctioned vs Expenditure per Sector -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-arrow-left-right me-1" style="color:#fd7e14;"></i> Sanctioned vs Expenditure per Sector
+                </h6>
+                <p class="text-muted small mb-3">Side-by-side comparison of allocation vs actual spend</p>
+                <div style="position:relative; height:280px;">
+                  <canvas id="edaFinCategoryBar"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ TAB 3: Location ════════════════════ -->
+      <div class="tab-pane fade" id="location-panel" role="tabpanel">
+        <div class="row g-4">
+
+          <!-- Projects by State – Bar Chart -->
+          <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body">
+                <h6 class="fw-bold mb-1" style="color:#0F2044;">
+                  <i class="bi bi-map me-1" style="color:#1565C0;"></i> Projects by State
+                </h6>
+                <p class="text-muted small mb-3">Project concentration across major states</p>
+                <div style="position:relative; height:340px;">
+                  <canvas id="edaStateBar"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects by State – Table -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100" style="border-radius:10px;">
+              <div class="card-body p-0">
+                <div class="px-4 py-3 border-bottom">
+                  <h6 class="fw-bold mb-0" style="color:#0F2044;">
+                    <i class="bi bi-table me-1" style="color:#1565C0;"></i> State-wise Count
+                  </h6>
+                </div>
+                <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+                  <table class="table table-sm table-striped table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
+                      <tr>
+                        <th class="ps-3">#</th>
+                        <th>State / UT</th>
+                        <th class="text-end pe-3">Projects</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% set ns = namespace(idx=1) %}
+                      {% for state, cnt in state_counts.items() %}
+                      <tr>
+                        <td class="ps-3 text-muted small">{{ ns.idx }}</td>
+                        <td class="fw-semibold small">{{ state }}</td>
+                        <td class="text-end pe-3">
+                          <span class="badge rounded-pill" style="background:#e8f0fe; color:#1565C0; font-size:0.78rem;">
+                            {{ cnt }}
+                          </span>
+                        </td>
+                      </tr>
+                      {% set ns.idx = ns.idx + 1 %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ TAB 4: Category ════════════════════ -->
+      <div class="tab-pane fade" id="category-panel" role="tabpanel">
+        <div class="card border-0 shadow-sm" style="border-radius:10px;">
+          <div class="card-body p-0">
+            <div class="px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="fw-bold mb-0" style="color:#0F2044;">
+                  <i class="bi bi-tags me-1" style="color:#1565C0;"></i> Sector / Category Financial Breakdown
+                </h6>
+                <p class="text-muted small mb-0 mt-1">Sanctioned outlay, expenditure and utilization rate per sector</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped table-bordered align-middle mb-0">
+                <thead style="background:#f0f4fa;">
+                  <tr>
+                    <th class="ps-3 py-2" style="color:#0F2044;">Sector / Category</th>
+                    <th class="py-2 text-end">Total Projects</th>
+                    <th class="py-2 text-end">Sanctioned (₹ Lakhs)</th>
+                    <th class="py-2 text-end">Expenditure (₹ Lakhs)</th>
+                    <th class="py-2 text-end pe-3">Utilization</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cat, stats in cat_fin.items() %}
+                  <tr>
+                    <td class="fw-semibold ps-3 small">{{ cat }}</td>
+                    <td class="text-end small">{{ cat_counts.get(cat, 0) }}</td>
+                    <td class="text-end small">₹{{ stats.sanctioned | round(2) }}L</td>
+                    <td class="text-end small">₹{{ stats.expenditure | round(2) }}L</td>
+                    <td class="text-end pe-3">
+                      {% set util = ((stats.expenditure / stats.sanctioned)*100) | round(1) if stats.sanctioned > 0 else 0 %}
+                      <span class="badge
+                        {% if util >= 90 %}bg-success-subtle text-success
+                        {% elif util >= 60 %}bg-warning-subtle text-warning
+                        {% else %}bg-danger-subtle text-danger{% endif %}
+                        border" style="font-size:0.78rem;">
+                        {{ util }}%
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div><!-- /tab card -->
+
   {% endif %}
 </div>
 {% endblock %}

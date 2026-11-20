@@ -1,219 +1,338 @@
 {% extends "base.html" %}
 {% set active_page = "upload" %}
 
-{% block title %}Data Ingestion Portal - MPLADS AI Sentinel{% endblock %}
+{% block title %}Upload MPLADS Dataset - MPLADS AI Sentinel{% endblock %}
 
 {% block content %}
+<style>
+  /* ── Drop zone ── */
+  .upload-dropzone {
+    border: 2.5px dashed #adb5bd;
+    border-radius: 12px;
+    background: #f8f9fb;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .upload-dropzone:hover,
+  .upload-dropzone.dragover {
+    border-color: #1565C0;
+    background: #e8f0fe;
+  }
+  .upload-dropzone .cloud-icon {
+    font-size: 3.2rem;
+    color: #1565C0;
+    margin-bottom: .75rem;
+    display: block;
+  }
+  /* ── Uploaded file pill ── */
+  #uploadedFileSection .file-pill {
+    background: #f0f7ff;
+    border: 1px solid #c8deff;
+    border-radius: 8px;
+    padding: .65rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  /* ── Synthetic pipeline card ── */
+  .pipeline-card {
+    background: linear-gradient(135deg, #1565C0 0%, #0F2044 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: #fff;
+  }
+  /* ── Schema table scroll ── */
+  .schema-scroll {
+    max-height: 490px;
+    overflow-y: auto;
+  }
+  /* ── Badge type colours ── */
+  .badge-string  { background: #e3f2fd; color: #1565C0; }
+  .badge-float   { background: #e8f5e9; color: #2e7d32; }
+  .badge-date    { background: #fff3e0; color: #e65100; }
+</style>
+
 <div class="container-fluid">
-  <!-- Header -->
-  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+
+  <!-- ── Page header ── -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-      <h3 class="fw-bold text-dark mb-1">Data Ingestion Portal</h3>
-      <p class="text-muted small mb-0">Upload real MPLADS scheme portal exports or initialize the benchmark synthetic dataset</p>
+      <h4 class="fw-bold text-dark mb-1">Upload MPLADS Dataset</h4>
+      <p class="text-muted small mb-0">Upload real MPLADS portal exports or initialize the benchmark synthetic dataset</p>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-outline-primary fw-semibold shadow-sm">
-        <i class="bi bi-play-circle me-1"></i> Quick Load Demo Dataset (5,000 Works)
-      </a>
-    </div>
+    <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-outline-primary btn-sm fw-semibold shadow-sm">
+      <i class="bi bi-play-circle me-1"></i> Quick Load Demo (5,000 Works)
+    </a>
   </div>
 
   <div class="row g-4">
-    <!-- Left Column: Upload Zone -->
+
+    <!-- ══════════════════════════════════════
+         LEFT COLUMN  (col-lg-7)
+         ══════════════════════════════════════ -->
     <div class="col-lg-7">
-      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> Upload Portal Dataset</h5>
-        <p class="text-secondary small mb-4">
-          Upload project data exported from central or state MPLADS monitoring systems. Supported formats include CSV, Microsoft Excel (.xlsx, .xls), and JSON. Files up to 16MB are processed through our automated alias mapper.
-        </p>
 
-        <form action="{{ url_for('views.upload_file') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
-          <div class="dropzone mb-3" id="dropArea">
-            <i class="bi bi-file-earmark-arrow-up display-4 text-primary mb-3"></i>
-            <h5 class="fw-bold text-dark mb-1">Drag and drop your dataset here</h5>
-            <p class="text-muted small mb-3">or browse your local filesystem</p>
-            <input type="file" name="dataset_file" id="fileInput" class="d-none" accept=".csv, .xlsx, .xls, .json" required>
-            <button type="button" class="btn btn-sm btn-primary px-3" onclick="document.getElementById('fileInput').click();">
-              <i class="bi bi-folder2-open me-1"></i> Select File
-            </button>
-            <div id="fileDetails" class="mt-3 small text-secondary fw-semibold d-none"></div>
-          </div>
+      <!-- Upload card -->
+      <div class="card shadow-sm rounded-3 border-0 mb-4">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-dark mb-1">
+            <i class="bi bi-cloud-upload text-primary me-2"></i>Upload Portal Dataset
+          </h6>
+          <p class="text-muted small mb-4">
+            Accepted formats: CSV, Excel (.xlsx / .xls), JSON &mdash; up to 16 MB.
+            Our engine automatically maps diverse column headers to the canonical schema.
+          </p>
 
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i> Client validation & automatic schema mapping</span>
-            <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm" id="submitBtn" disabled>
-              <i class="bi bi-lightning-charge me-1"></i> Upload & Run Pipeline
-            </button>
-          </div>
-        </form>
-      </div>
+          <form action="{{ url_for('views.upload_file') }}" method="POST"
+                enctype="multipart/form-data" id="uploadForm">
 
-      <!-- Demo Dataset Card -->
-      <div class="card border-primary border-opacity-25 shadow-sm rounded-4 p-4 bg-primary bg-opacity-10">
+            <!-- Drag & Drop zone -->
+            <div class="upload-dropzone mb-3" id="dropArea"
+                 onclick="document.getElementById('fileInput').click();">
+              <i class="bi bi-cloud-upload cloud-icon"></i>
+              <h6 class="fw-semibold text-dark mb-1">Drag &amp; drop your file here</h6>
+              <p class="text-muted small mb-3">or click to browse your filesystem</p>
+
+              <!-- Format badges -->
+              <div class="d-flex justify-content-center gap-2 mb-3">
+                <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 fw-semibold">
+                  <i class="bi bi-filetype-csv me-1"></i>CSV
+                </span>
+                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 fw-semibold">
+                  <i class="bi bi-file-earmark-spreadsheet me-1"></i>XLSX
+                </span>
+                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-1 fw-semibold">
+                  <i class="bi bi-filetype-json me-1"></i>JSON
+                </span>
+              </div>
+
+              <input type="file" name="dataset_file" id="fileInput"
+                     class="d-none" accept=".csv,.xlsx,.xls,.json" required>
+
+              <button type="button" class="btn btn-outline-primary btn-sm px-4 fw-semibold"
+                      onclick="event.stopPropagation(); document.getElementById('fileInput').click();">
+                <i class="bi bi-folder2-open me-1"></i> Choose File
+              </button>
+            </div>
+
+            <!-- Uploaded file info (shown after selection) -->
+            <div id="uploadedFileSection" class="mb-3 d-none">
+              <p class="text-muted small fw-semibold mb-2 text-uppercase" style="letter-spacing:.05em;">
+                <i class="bi bi-paperclip me-1"></i>Selected File
+              </p>
+              <div class="file-pill">
+                <i class="bi bi-file-earmark-check fs-4 text-primary"></i>
+                <div class="flex-grow-1">
+                  <div id="fileName" class="fw-semibold text-dark small"></div>
+                  <div id="fileSize" class="text-muted" style="font-size:.78rem;"></div>
+                </div>
+                <span class="badge bg-success-subtle text-success">
+                  <i class="bi bi-check-circle me-1"></i>Ready
+                </span>
+              </div>
+            </div>
+
+            <!-- Submit row -->
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted small">
+                <i class="bi bi-shield-check text-success me-1"></i>
+                Client-side validation &amp; automatic schema mapping
+              </span>
+              <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm"
+                      id="submitBtn" disabled>
+                <i class="bi bi-lightning-charge me-1"></i> Upload &amp; Analyze
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div><!-- /upload card -->
+
+      <!-- Initialize Synthetic Pipeline card -->
+      <div class="pipeline-card shadow">
         <div class="d-flex align-items-start gap-3">
-          <div class="p-3 bg-white rounded-3 shadow-sm text-primary">
+          <div class="bg-white bg-opacity-15 rounded-3 p-3 text-white">
             <i class="bi bi-database-fill-gear fs-3"></i>
           </div>
           <div>
-            <h5 class="fw-bold text-dark mb-1">Use Benchmark Synthetic Dataset</h5>
-            <p class="text-secondary small mb-3">
-              Generated according to academic testing specifications with 5,000 realistic records spanning 12 Indian states, 6 infrastructure sectors, and 8–12% controlled anomaly injections (cost overruns, chronic delays, near-duplicate works, and threshold disbursals).
+            <h6 class="fw-bold text-white mb-1">Initialize Synthetic Pipeline</h6>
+            <p class="text-white-50 small mb-3">
+              Loads 5,000 realistic benchmark records across 12 Indian states and 6 infrastructure
+              sectors — with controlled anomaly injections (cost overruns, delays, near-duplicate
+              works, threshold disbursals) for academic testing.
             </p>
-            <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm px-3 fw-semibold">
+            <a href="{{ url_for('views.load_demo_data') }}"
+               class="btn btn-light btn-sm px-4 fw-semibold text-primary shadow-sm">
               <i class="bi bi-arrow-repeat me-1"></i> Initialize Synthetic Pipeline
             </a>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Right Column: Schema Reference & Aliases Guide -->
+    </div><!-- /col-lg-7 -->
+
+    <!-- ══════════════════════════════════════
+         RIGHT COLUMN  (col-lg-5)
+         ══════════════════════════════════════ -->
     <div class="col-lg-5">
-      <div class="card border shadow-sm rounded-4 p-4 bg-white">
-        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-table text-primary me-2"></i> Expected Canonical Schema</h5>
-        <p class="text-muted small mb-3">The automated ingestion engine automatically recognizes and maps diverse column headers from government spreadsheets to these canonical attributes:</p>
+      <div class="card shadow-sm rounded-3 border-0 h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-dark mb-1">
+            <i class="bi bi-table text-primary me-2"></i>Expected Schema
+          </h6>
+          <p class="text-muted small mb-3">
+            The ingestion engine auto-maps common column headers from government spreadsheets
+            to these canonical field names:
+          </p>
 
-        <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
-          <table class="table table-sm table-striped small align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Canonical Name</th>
-                <th>Type</th>
-                <th>Common Aliases</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>work_id</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">workid, project_id, id, scheme_code</td>
-              </tr>
-              <tr>
-                <td><code>mp_name</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">mp, member_of_parliament, honble_mp</td>
-              </tr>
-              <tr>
-                <td><code>constituency</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">pc_name, parliamentary_constituency</td>
-              </tr>
-              <tr>
-                <td><code>state</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">state_name, state_ut, st_name</td>
-              </tr>
-              <tr>
-                <td><code>district</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">district_name, dist_name</td>
-              </tr>
-              <tr>
-                <td><code>implementing_agency</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">agency, department, executing_agency</td>
-              </tr>
-              <tr>
-                <td><code>work_category</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">category, sector, head_of_expenditure</td>
-              </tr>
-              <tr>
-                <td><code>work_description</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">description, work_name, title</td>
-              </tr>
-              <tr>
-                <td><code>sanctioned_amount</code></td>
-                <td><span class="badge bg-light text-dark border">Float</span></td>
-                <td class="text-muted">sanction_amount, amount_sanctioned</td>
-              </tr>
-              <tr>
-                <td><code>estimated_cost</code></td>
-                <td><span class="badge bg-light text-dark border">Float</span></td>
-                <td class="text-muted">estimate_cost, estimated_amount</td>
-              </tr>
-              <tr>
-                <td><code>authorized_amount</code></td>
-                <td><span class="badge bg-light text-dark border">Float</span></td>
-                <td class="text-muted">released_amount, amount_released</td>
-              </tr>
-              <tr>
-                <td><code>expenditure</code></td>
-                <td><span class="badge bg-light text-dark border">Float</span></td>
-                <td class="text-muted">expenditure_incurred, spent_amount</td>
-              </tr>
-              <tr>
-                <td><code>sanction_date</code></td>
-                <td><span class="badge bg-light text-dark border">Date</span></td>
-                <td class="text-muted">date_of_sanction, approval_date</td>
-              </tr>
-              <tr>
-                <td><code>expected_completion_date</code></td>
-                <td><span class="badge bg-light text-dark border">Date</span></td>
-                <td class="text-muted">target_date, scheduled_completion</td>
-              </tr>
-              <tr>
-                <td><code>status</code></td>
-                <td><span class="badge bg-light text-dark border">String</span></td>
-                <td class="text-muted">work_status, project_status</td>
-              </tr>
-              <tr>
-                <td><code>progress_percent</code></td>
-                <td><span class="badge bg-light text-dark border">Float</span></td>
-                <td class="text-muted">physical_progress, progress_pct</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="schema-scroll">
+            <table class="table table-sm table-striped table-bordered align-middle small mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th style="width:38%">Field Name</th>
+                  <th style="width:14%">Type</th>
+                  <th>Common Aliases</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>work_id</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">workid, project_id, id, scheme_code</td>
+                </tr>
+                <tr>
+                  <td><code>mp_name</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">mp, member_of_parliament, honble_mp</td>
+                </tr>
+                <tr>
+                  <td><code>constituency</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">pc_name, parliamentary_constituency</td>
+                </tr>
+                <tr>
+                  <td><code>state</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">state_name, state_ut, st_name</td>
+                </tr>
+                <tr>
+                  <td><code>district</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">district_name, dist_name</td>
+                </tr>
+                <tr>
+                  <td><code>implementing_agency</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">agency, department, executing_agency</td>
+                </tr>
+                <tr>
+                  <td><code>work_category</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">category, sector, head_of_expenditure</td>
+                </tr>
+                <tr>
+                  <td><code>work_description</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">description, work_name, title</td>
+                </tr>
+                <tr>
+                  <td><code>sanctioned_amount</code></td>
+                  <td><span class="badge badge-float rounded-pill px-2">Float</span></td>
+                  <td class="text-muted">sanction_amount, amount_sanctioned</td>
+                </tr>
+                <tr>
+                  <td><code>estimated_cost</code></td>
+                  <td><span class="badge badge-float rounded-pill px-2">Float</span></td>
+                  <td class="text-muted">estimate_cost, estimated_amount</td>
+                </tr>
+                <tr>
+                  <td><code>authorized_amount</code></td>
+                  <td><span class="badge badge-float rounded-pill px-2">Float</span></td>
+                  <td class="text-muted">released_amount, amount_released</td>
+                </tr>
+                <tr>
+                  <td><code>expenditure</code></td>
+                  <td><span class="badge badge-float rounded-pill px-2">Float</span></td>
+                  <td class="text-muted">expenditure_incurred, spent_amount</td>
+                </tr>
+                <tr>
+                  <td><code>sanction_date</code></td>
+                  <td><span class="badge badge-date rounded-pill px-2">Date</span></td>
+                  <td class="text-muted">date_of_sanction, approval_date</td>
+                </tr>
+                <tr>
+                  <td><code>expected_completion_date</code></td>
+                  <td><span class="badge badge-date rounded-pill px-2">Date</span></td>
+                  <td class="text-muted">target_date, scheduled_completion</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td><span class="badge badge-string rounded-pill px-2">String</span></td>
+                  <td class="text-muted">work_status, project_status</td>
+                </tr>
+                <tr>
+                  <td><code>progress_percent</code></td>
+                  <td><span class="badge badge-float rounded-pill px-2">Float</span></td>
+                  <td class="text-muted">physical_progress, progress_pct</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </div><!-- /col-lg-5 -->
+
+  </div><!-- /row -->
+</div><!-- /container-fluid -->
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const fileInput = document.getElementById("fileInput");
-  const dropArea = document.getElementById("dropArea");
-  const submitBtn = document.getElementById("submitBtn");
-  const fileDetails = document.getElementById("fileDetails");
+  const fileInput            = document.getElementById("fileInput");
+  const dropArea             = document.getElementById("dropArea");
+  const submitBtn            = document.getElementById("submitBtn");
+  const uploadedFileSection  = document.getElementById("uploadedFileSection");
+  const fileNameEl           = document.getElementById("fileName");
+  const fileSizeEl           = document.getElementById("fileSize");
+
+  function showFileInfo(file) {
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = (file.size / 1024).toFixed(1) + " KB";
+    uploadedFileSection.classList.remove("d-none");
+    submitBtn.disabled = false;
+  }
 
   if (fileInput) {
     fileInput.addEventListener("change", function () {
       if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        fileDetails.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-        fileDetails.classList.remove("d-none");
-        submitBtn.disabled = false;
+        showFileInfo(fileInput.files[0]);
       }
     });
 
-    // Drag and drop listeners
-    ['dragenter', 'dragover'].forEach(eventName => {
+    // Drag-and-drop
+    ["dragenter", "dragover"].forEach(eventName => {
       dropArea.addEventListener(eventName, (e) => {
         e.preventDefault();
-        dropArea.classList.add('dragover');
+        dropArea.classList.add("dragover");
       }, false);
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
+    ["dragleave", "drop"].forEach(eventName => {
       dropArea.addEventListener(eventName, (e) => {
         e.preventDefault();
-        dropArea.classList.remove('dragover');
+        dropArea.classList.remove("dragover");
       }, false);
     });
 
-    dropArea.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      const files = dt.files;
+    dropArea.addEventListener("drop", (e) => {
+      const files = e.dataTransfer.files;
       if (files.length > 0) {
         fileInput.files = files;
-        const file = files[0];
-        fileDetails.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-        fileDetails.classList.remove("d-none");
-        submitBtn.disabled = false;
+        showFileInfo(files[0]);
       }
     });
   }

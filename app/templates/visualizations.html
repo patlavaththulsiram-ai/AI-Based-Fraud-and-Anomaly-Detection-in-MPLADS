@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% set active_page = "visualizations" %}
+
+{% block title %}Visualizations - MPLADS AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .visualization-chart { position: relative; height: 320px; }
+  .visualization-tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .visualization-tabs .nav-link { white-space: nowrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Visualizations</h3>
+      <p class="text-muted small mb-0">
+        Interactive project, fund, efficiency, risk, and regional views for dataset
+        <code>{{ dataset_id or current_dataset_id or "No dataset selected" }}</code>.
+      </p>
+    </div>
+    <a href="{{ url_for('views.reports_view') }}" class="btn btn-sm btn-outline-primary mt-3 mt-md-0">
+      <i class="bi bi-file-earmark-bar-graph me-1"></i> Reports &amp; Exports
+    </a>
+  </div>
+
+  {% if not has_data %}
+  <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
+    <i class="bi bi-bar-chart-line fs-1 text-secondary mb-3"></i>
+    <h5 class="fw-bold">No visualizations available</h5>
+    <p class="text-muted small">Select a dataset with processed project records to view its analysis.</p>
+    <div>
+      <a href="{{ url_for('views.select_dataset') }}" class="btn btn-primary btn-sm">Select Dataset</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Projects Analyzed</span>
+        <div class="kpi-val text-primary mt-1">{{ "{:,}".format(summary.total_projects) }}</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Sanctioned Outlay</span>
+        <div class="kpi-val text-primary mt-1">₹{{ "{:,.2f}".format(summary.total_sanctioned_crores) }} <span class="fs-6 text-muted">Cr</span></div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">Reported Expenditure</span>
+        <div class="kpi-val text-success mt-1">₹{{ "{:,.2f}".format(summary.total_expenditure_crores) }} <span class="fs-6 text-muted">Cr</span></div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card card-stat p-3 h-100">
+        <span class="kpi-label">High / Critical Risk</span>
+        <div class="kpi-val text-danger mt-1">{{ "{:,}".format(summary.high_risk_projects) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border shadow-sm rounded-4 bg-white">
+    <div class="card-header bg-white border-bottom py-2">
+      <ul class="nav nav-pills card-header-pills gap-1 visualization-tabs" id="visualizationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active btn-sm" id="exec-tab" data-bs-toggle="pill" data-bs-target="#exec-panel" type="button" role="tab" aria-controls="exec-panel" aria-selected="true">
+            <i class="bi bi-speedometer2 me-1"></i> Executive Dashboard
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm" id="financial-tab" data-bs-toggle="pill" data-bs-target="#financial-panel" type="button" role="tab" aria-controls="financial-panel" aria-selected="false">
+            <i class="bi bi-cash-stack me-1"></i> Financial Dashboard
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm" id="efficiency-tab" data-bs-toggle="pill" data-bs-target="#efficiency-panel" type="button" role="tab" aria-controls="efficiency-panel" aria-selected="false">
+            <i class="bi bi-hourglass-split me-1"></i> Efficiency Dashboard
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm" id="risk-tab" data-bs-toggle="pill" data-bs-target="#risk-panel" type="button" role="tab" aria-controls="risk-panel" aria-selected="false">
+            <i class="bi bi-shield-exclamation me-1"></i> AI Risk Dashboard
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link btn-sm" id="regional-tab" data-bs-toggle="pill" data-bs-target="#regional-panel" type="button" role="tab" aria-controls="regional-panel" aria-selected="false">
+            <i class="bi bi-geo-alt me-1"></i> Regional Dashboard
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content" id="visualizationTabContent">
+        <section class="tab-pane fade show active" id="exec-panel" role="tabpanel" aria-labelledby="exec-tab" tabindex="0">
+          <div class="row g-3">
+            <div class="col-xl-5">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Project Status Distribution</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="statusChart" aria-label="Project status distribution"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-xl-7">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Projects by State</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="executiveRegionalChart" aria-label="Project count by state"></canvas></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-pane fade" id="financial-panel" role="tabpanel" aria-labelledby="financial-tab" tabindex="0">
+          <div class="card border rounded-3">
+            <div class="card-header bg-white fw-semibold">Sanctioned, Authorized, and Spent by Category (₹ Crores)</div>
+            <div class="card-body"><div class="visualization-chart"><canvas id="financialChart" aria-label="Financial totals by category"></canvas></div></div>
+          </div>
+        </section>
+
+        <section class="tab-pane fade" id="efficiency-panel" role="tabpanel" aria-labelledby="efficiency-tab" tabindex="0">
+          <div class="row g-3">
+            <div class="col-xl-7">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Reported Delay Distribution</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="delayChart" aria-label="Project count by delay range"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-xl-5">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Average Progress by Project Status</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="progressChart" aria-label="Average project progress by status"></canvas></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-pane fade" id="risk-panel" role="tabpanel" aria-labelledby="risk-tab" tabindex="0">
+          <div class="row g-3">
+            <div class="col-xl-5">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Risk Level Distribution</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="riskChart" aria-label="Risk level distribution"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-xl-7">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Average Risk Indicator Scores</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="riskDriversChart" aria-label="Average risk indicator scores"></canvas></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-pane fade" id="regional-panel" role="tabpanel" aria-labelledby="regional-tab" tabindex="0">
+          <div class="row g-3">
+            <div class="col-xl-7">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Project and High-Risk Works by State</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="regionalProjectsChart" aria-label="Project and high-risk project counts by state"></canvas></div></div>
+              </div>
+            </div>
+            <div class="col-xl-5">
+              <div class="card border rounded-3 h-100">
+                <div class="card-header bg-white fw-semibold">Reported Expenditure by State (₹ Crores)</div>
+                <div class="card-body"><div class="visualization-chart"><canvas id="regionalExpenditureChart" aria-label="Expenditure by state"></canvas></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if has_data %}
+<script>
+  const visualizationData = {{ chart_data | tojson }};
+  const chartColors = ["#2563EB", "#16A34A", "#F59E0B", "#DC2626", "#7C3AED", "#0891B2", "#64748B", "#DB2777"];
+  const axisOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: "bottom" } },
+    scales: { y: { beginAtZero: true } }
+  };
+  const makeChart = (id, type, labels, datasets, options = {}) => {
+    const canvas = document.getElementById(id);
+    if (canvas) {
+      new Chart(canvas, {
+        type,
+        data: { labels, datasets },
+        options: { ...axisOptions, ...options }
+      });
+    }
+  };
+
+  makeChart("statusChart", "doughnut", visualizationData.status.labels, [{
+    data: visualizationData.status.values,
+    backgroundColor: chartColors
+  }], { scales: {} });
+  makeChart("executiveRegionalChart", "bar", visualizationData.regional.labels, [{
+    label: "Projects",
+    data: visualizationData.regional.projects,
+    backgroundColor: "#2563EB"
+  }]);
+  makeChart("financialChart", "bar", visualizationData.financial.labels, [
+    { label: "Sanctioned", data: visualizationData.financial.sanctioned, backgroundColor: "#2563EB" },
+    { label: "Authorized", data: visualizationData.financial.authorized, backgroundColor: "#0891B2" },
+    { label: "Expenditure", data: visualizationData.financial.expenditure, backgroundColor: "#16A34A" }
+  ], { scales: { x: { beginAtZero: true }, y: { beginAtZero: true } } });
+  makeChart("delayChart", "bar", visualizationData.delays.labels, [{
+    label: "Projects",
+    data: visualizationData.delays.values,
+    backgroundColor: "#F59E0B"
+  }]);
+  makeChart("progressChart", "bar", visualizationData.progress.labels, [{
+    label: "Average progress (%)",
+    data: visualizationData.progress.values,
+    backgroundColor: "#16A34A"
+  }]);
+  makeChart("riskChart", "doughnut", visualizationData.risk.labels, [{
+    data: visualizationData.risk.values,
+    backgroundColor: ["#16A34A", "#F59E0B", "#F97316", "#DC2626", "#64748B"]
+  }], { scales: {} });
+  makeChart("riskDriversChart", "bar", visualizationData.risk_drivers.labels, [{
+    label: "Average score",
+    data: visualizationData.risk_drivers.values,
+    backgroundColor: "#7C3AED"
+  }]);
+  makeChart("regionalProjectsChart", "bar", visualizationData.regional.labels, [
+    { label: "Projects", data: visualizationData.regional.projects, backgroundColor: "#2563EB" },
+    { label: "High / critical risk", data: visualizationData.regional.high_risk, backgroundColor: "#DC2626" }
+  ]);
+  makeChart("regionalExpenditureChart", "bar", visualizationData.regional.labels, [{
+    label: "Expenditure (₹ Cr)",
+    data: visualizationData.regional.expenditure,
+    backgroundColor: "#16A34A"
+  }]);
+
+  document.querySelectorAll('#visualizationTabs [data-bs-toggle="pill"]').forEach((tab) => {
+    tab.addEventListener("shown.bs.tab", () => {
+      const panel = document.querySelector(tab.dataset.bsTarget);
+      panel.querySelectorAll("canvas").forEach((canvas) => Chart.getChart(canvas)?.resize());
+    });
+  });
+</script>
+{% endif %}
+{% endblock %}

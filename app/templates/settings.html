@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+
+{% block title %}Settings - MPLADS AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+  <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        {% if current_user.is_admin() %}System Settings &amp; Administration{% else %}User Account Settings{% endif %}
+      </h3>
+      <p class="text-muted small mb-0">
+        {% if current_user.is_admin() %}
+          Configure risk model weights, risk thresholds, and account credentials.
+        {% else %}
+          Manage your personal account credentials and active session.
+        {% endif %}
+      </p>
+    </div>
+    <div>
+      <span class="badge {% if current_user.is_admin() %}bg-danger{% else %}bg-primary{% endif %} px-3 py-2 fs-6">
+        <i class="bi {% if current_user.is_admin() %}bi-shield-lock{% else %}bi-person{% endif %} me-1"></i>
+        Role: {{ current_user.role.title() }}
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Administrative settings -->
+    {% if current_user.is_admin() %}
+    <div class="col-xl-8">
+      <!-- Risk Calibration Form -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-sliders me-2 text-primary"></i>Risk Score Calibration</h5>
+        <p class="text-muted small mb-4">Weights determine each model's contribution to the composite risk score (0.0 to 1.0, must sum to 1.0).</p>
+
+        <form method="POST" action="{{ url_for('views.settings_view') }}">
+          <input type="hidden" name="form_type" value="admin_config">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="weight_if" class="form-label small fw-semibold">Isolation Forest Weight</label>
+              <input type="number" class="form-control" id="weight_if" name="weight_if" min="0" max="1" step="0.01" value="{{ weights['if'] }}" required>
+            </div>
+            <div class="col-md-6">
+              <label for="weight_svm" class="form-label small fw-semibold">One-Class SVM Weight</label>
+              <input type="number" class="form-control" id="weight_svm" name="weight_svm" min="0" max="1" step="0.01" value="{{ weights['svm'] }}" required>
+            </div>
+            <div class="col-md-6">
+              <label for="weight_rf" class="form-label small fw-semibold">Random Forest Weight</label>
+              <input type="number" class="form-control" id="weight_rf" name="weight_rf" min="0" max="1" step="0.01" value="{{ weights['rf'] }}" required>
+              <small class="text-muted" style="font-size:0.75rem;">Supervised model applied when ground-truth labels exist.</small>
+            </div>
+            <div class="col-md-6">
+              <label for="weight_rules" class="form-label small fw-semibold">Deterministic Policy Rules Weight</label>
+              <input type="number" class="form-control" id="weight_rules" name="weight_rules" min="0" max="1" step="0.01" value="{{ weights['rules'] }}" required>
+            </div>
+
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-4 px-4 fw-semibold">
+            <i class="bi bi-save me-1"></i> Save Risk Settings
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Side Card: Risk Thresholds -->
+    <div class="col-xl-4">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold mb-2 text-dark"><i class="bi bi-speedometer me-2 text-danger"></i>Risk Thresholds</h5>
+        <p class="text-muted small mb-3">Application classification bands used for prioritization triage.</p>
+        <div class="list-group list-group-flush border rounded-3">
+          {% for level, limits in thresholds.items() %}
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <span class="badge badge-risk-{{ level | lower }} px-2 py-1">{{ level | title }}</span>
+            <span class="small font-monospace fw-semibold text-secondary">{{ limits[0] }} – {{ limits[1] }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="alert alert-secondary small mt-3 mb-0" style="font-size: 0.76rem;">
+          <i class="bi bi-info-circle me-1"></i> These threshold bands are application analytical settings and do not represent official statutory classifications.
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if current_user.is_admin() %}
+    <div class="col-12">
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+          <div>
+            <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-people-fill me-2 text-primary"></i>User Management / Active Users</h5>
+            <p class="text-muted small mb-0">Active users are accounts with activity in the last 15 minutes.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-success-subtle text-success border px-3 py-2">Active Users: {{ active_user_count }}</span>
+            <span class="badge bg-primary-subtle text-primary border px-3 py-2">Total Users: {{ user_count }}</span>
+            <span class="badge bg-danger-subtle text-danger border px-3 py-2">Admins: {{ admin_user_count }}</span>
+            <span class="badge bg-light text-dark border px-3 py-2">Users: {{ regular_user_count }}</span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td class="fw-semibold">{{ user.full_name }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role | title }}</td>
+                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</td>
+                <td>
+                  {% if user.id in active_user_ids %}
+                  <span class="badge bg-success-subtle text-success border">Active</span>
+                  {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary border">Inactive</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="text-center text-muted py-4">No user accounts found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- USER & ADMIN SETTINGS: Change Password & Logout -->
+    <!-- For User: this is the ONLY content shown on the page -->
+    <div class="{% if current_user.is_admin() %}col-xl-8{% else %}col-lg-6 mx-auto{% endif %}">
+      <!-- Change Password Form -->
+      <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-key-fill me-2 text-primary"></i>Change Password</h5>
+        </div>
+        <p class="text-muted small mb-4">Update your account credentials. Passwords are cryptographically hashed using PBKDF2/SHA256 before storage.</p>
+
+        <form method="POST" action="{{ url_for('views.settings_view') }}">
+          <input type="hidden" name="form_type" value="change_password">
+
+          <div class="mb-3">
+            <label for="new_password" class="form-label small fw-semibold">New Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Enter new password (min. 6 characters)" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="confirm_password" class="form-label small fw-semibold">Confirm Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
+              <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary fw-semibold px-4">
+            <i class="bi bi-check-circle me-1"></i> Change Password
+          </button>
+        </form>
+      </div>
+
+      <!-- Logout Card -->
+      <div class="card border border-danger-subtle shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="fw-bold text-danger mb-1"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</h6>
+            <p class="text-muted small mb-0">End your active analytical session and clear the selected dataset from session memory.</p>
+          </div>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger fw-semibold px-4">
+            <i class="bi bi-power me-1"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

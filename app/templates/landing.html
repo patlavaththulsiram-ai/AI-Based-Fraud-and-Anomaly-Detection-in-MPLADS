@@ -1,187 +1,732 @@
-{% extends "base.html" %}
-{% set active_page = "landing" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPLADS AI - Intelligent Monitoring & Risk Analytics</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
 
-{% block title %}MPLADS AI - Algorithmic Audit & Fraud-Risk Sentinel{% endblock %}
+  <style>
+    /* ─── Reset & base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body.lp-body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff;
+      color: #1e2d45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-{% block content %}
-<div class="container-fluid py-4">
-  <!-- Hero Section -->
-  <div class="row align-items-center mb-5 py-4 px-3 rounded-4 bg-white border shadow-sm">
-    <div class="col-lg-8">
-      <div class="d-inline-flex align-items-center gap-2 mb-3">
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
-          <i class="bi bi-shield-check me-1"></i> AI-Powered Public Expenditure Sentinel
-        </span>
-        <span class="prototype-tag">B.Tech CSE Data Science Prototype</span>
-      </div>
-      <h1 class="display-6 fw-bold text-navy mb-3" style="color: #0F172A; letter-spacing: -0.02em;">
-        Data Anomaly and Fraud Risk Detection System for MPLADS Works
-      </h1>
-      <p class="lead text-secondary mb-4" style="font-size: 1.05rem; line-height: 1.6;">
-        An explainable computational auditing framework evaluating ₹ Crores in constituency development outlays.
-        Ingests project records, validates semantic integrity, screens duplicate tenders with NLP, detects anomalous disbursals using ensemble machine learning, and produces transparent 0–100 risk indicators.
-      </p>
-      
-      <div class="d-flex flex-wrap gap-3">
-        <a href="{{ url_for('views.dashboard') }}" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">
-          <i class="bi bi-speedometer2 me-2"></i> Launch Audit Dashboard
-        </a>
-        <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-outline-primary px-4 py-2 fw-semibold">
-          <i class="bi bi-play-circle me-2"></i> Load Demo Dataset (5,000 Records)
-        </a>
-        <a href="{{ url_for('views.upload') }}" class="btn btn-light border px-4 py-2 fw-semibold text-secondary">
-          <i class="bi bi-cloud-arrow-up me-2"></i> Ingest Portal Export
-        </a>
-      </div>
-    </div>
-    <div class="col-lg-4 text-center mt-4 mt-lg-0">
-      <div class="p-4 rounded-4 bg-light border text-center">
-        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Audit Shield" width="110" height="110" class="mb-3">
-        <h5 class="fw-bold text-dark mb-1">MPLADS AI Sentinel</h5>
-        <div class="text-muted small mb-3">Multi-Tier Algorithmic Oversight</div>
-        <div class="d-flex justify-content-center gap-2">
-          <span class="badge bg-success-subtle text-success border">12 States</span>
-          <span class="badge bg-info-subtle text-info border">3 ML Models</span>
-          <span class="badge bg-warning-subtle text-warning-emphasis border">8 Policy Rules</span>
-        </div>
-      </div>
-    </div>
+    /* ─── Flash messages wrapper ─── */
+    .lp-flashes { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); z-index: 9999; width: min(96%, 700px); }
+
+    /* ══════════════════════════════════════════
+       TOP NAVBAR
+    ══════════════════════════════════════════ */
+    .lp-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      background: #0d1e35;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 0;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.28);
+    }
+
+    /* Brand */
+    .lp-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .lp-brand-logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #fff; font-weight: 800;
+    }
+    .lp-brand-text strong {
+      display: block; font-size: 1rem; font-weight: 800;
+      letter-spacing: -0.01em; color: #fff;
+    }
+    .lp-brand-text strong span { color: #42a5f5; }
+    .lp-brand-text small {
+      display: block; font-size: 0.65rem; color: #90caf9;
+      letter-spacing: 0.01em;
+    }
+
+    /* Navigation menu */
+    .lp-menu { position: relative; margin-left: auto; flex-shrink: 0; }
+    .lp-menu-toggle {
+      width: 40px; height: 40px;
+      border: 1px solid rgba(144,202,249,0.5);
+      border-radius: 6px;
+      background: transparent;
+      color: #cdd9e8;
+      font-size: 1.35rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lp-menu-toggle:hover, .lp-menu-toggle[aria-expanded="true"] {
+      color: #fff; border-color: #90caf9; background: rgba(144,202,249,0.1);
+    }
+    .lp-menu-items {
+      position: absolute; top: calc(100% + 8px); right: 0; z-index: 1060;
+      min-width: 190px; padding: 6px;
+      border: 1px solid #e2e8f0; border-radius: 8px;
+      background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .lp-menu-items[hidden] { display: none; }
+    .lp-menu-items a {
+      padding: 9px 10px; border-radius: 5px;
+      color: #1e2d45; font-size: 0.84rem; font-weight: 600;
+      text-decoration: none; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .lp-menu-items a:hover, .lp-menu-items a:focus {
+      color: #1565c0; background: #e3f2fd; outline: none;
+    }
+    .btn-lp-login {
+      border: 1.5px solid #90caf9;
+      color: #90caf9;
+      background: transparent;
+      font-size: 0.84rem; font-weight: 600;
+      padding: 7px 18px; border-radius: 5px;
+      text-decoration: none;
+      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-lp-login:hover { background: rgba(144,202,249,0.1); color: #fff; border-color: #fff; }
+    .btn-lp-register {
+      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+      color: #fff;
+      font-size: 0.84rem; font-weight: 600;
+      padding: 7px 18px; border-radius: 5px;
+      text-decoration: none; border: none;
+      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-lp-register:hover { background: linear-gradient(135deg, #1e88e5 0%, #1976d2 100%); color: #fff; }
+
+    /* ══════════════════════════════════════════
+       HERO SECTION
+    ══════════════════════════════════════════ */
+    .lp-hero {
+      position: relative;
+      background: linear-gradient(115deg, #0a1929 0%, #0d2137 40%, #0a2744 70%, #0d2f5c 100%);
+      min-height: 430px;
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    /* Stars / subtle noise overlay */
+    .lp-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(21,101,192,0.18) 0%, transparent 55%),
+        radial-gradient(circle at 80% 30%, rgba(13,71,161,0.14) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .lp-hero-inner {
+      position: relative;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 32px 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* Left copy */
+    .lp-hero-copy { z-index: 1; }
+    .lp-gov-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(25,118,210,0.25);
+      border: 1px solid rgba(66,165,245,0.45);
+      color: #90caf9; font-size: 0.74rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+      margin-bottom: 16px; letter-spacing: 0.03em;
+    }
+    .lp-hero-title {
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .lp-hero-title span { color: #42a5f5; }
+
+    .lp-hero-subtitle {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e3eaf5;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .lp-hero-desc {
+      font-size: 0.9rem;
+      color: #9db8d2;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      max-width: 440px;
+    }
+
+    .lp-hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .lp-hero-btns[hidden] { display: none; }
+    .btn-hero-login {
+      background: linear-gradient(135deg, #1976d2, #1565c0);
+      color: #fff; border: none;
+      padding: 11px 26px; border-radius: 6px;
+      font-size: 0.9rem; font-weight: 700;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.15s;
+      box-shadow: 0 4px 16px rgba(21,101,192,0.45);
+    }
+    .btn-hero-login:hover { background: linear-gradient(135deg, #1e88e5, #1976d2); color: #fff; transform: translateY(-1px); }
+    .btn-hero-register {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.55);
+      color: #fff;
+      padding: 11px 26px; border-radius: 6px;
+      font-size: 0.9rem; font-weight: 700;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-hero-register:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #fff; }
+
+    /* Right image */
+    .lp-hero-visual {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.55);
+      height: 320px;
+    }
+    .lp-hero-visual img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+    }
+    .lp-hero-visual-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(10,25,41,0.08) 0%, rgba(10,25,41,0.35) 100%);
+    }
+    .lp-hero-quote {
+      position: absolute;
+      top: 18px; right: 18px;
+      background: rgba(0,0,0,0.52);
+      backdrop-filter: blur(6px);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #e3eaf5;
+      font-size: 0.78rem;
+      font-style: italic;
+      font-weight: 600;
+      line-height: 1.45;
+      text-align: right;
+      max-width: 180px;
+    }
+    .lp-hero-quote span { color: #42a5f5; }
+
+    /* ══════════════════════════════════════════
+       FEATURES STRIP
+    ══════════════════════════════════════════ */
+    .lp-features {
+      background: #fff;
+      padding: 44px 32px 36px;
+      border-bottom: 1px solid #e8edf3;
+    }
+    .lp-features-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 20px;
+    }
+    .lp-feat {
+      text-align: center;
+      padding: 16px 10px;
+      border-radius: 12px;
+      transition: box-shadow 0.2s;
+    }
+    .lp-feat:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .lp-feat-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 14px;
+    }
+    .lp-feat-title {
+      font-size: 0.82rem; font-weight: 700;
+      color: #1e2d45; margin-bottom: 6px;
+    }
+    .lp-feat-desc {
+      font-size: 0.73rem;
+      color: #6b7e96;
+      line-height: 1.5;
+    }
+
+    /* Icon color variants */
+    .fi-blue   { background: #e3f2fd; color: #1565c0; }
+    .fi-green  { background: #e8f5e9; color: #2e7d32; }
+    .fi-purple { background: #f3e5f5; color: #6a1b9a; }
+    .fi-orange { background: #fff3e0; color: #e65100; }
+    .fi-teal   { background: #e0f2f1; color: #00695c; }
+    .fi-red    { background: #fce4ec; color: #c62828; }
+
+    /* ══════════════════════════════════════════
+       STATS STRIP
+    ══════════════════════════════════════════ */
+    .lp-stats {
+      background: #f4f8fc;
+      padding: 32px 32px;
+    }
+    .lp-stats-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+    }
+    .lp-stat {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.055);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .lp-stat:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,0.1); }
+    .lp-stat-icon {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; flex-shrink: 0;
+    }
+    .lp-stat-val {
+      font-size: 1.35rem; font-weight: 800;
+      color: #1e2d45; line-height: 1;
+      margin-bottom: 3px;
+    }
+    .lp-stat-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: #6b7e96; letter-spacing: 0.02em;
+    }
+
+    /* Stat icon colors */
+    .si-blue   { background: #e3f2fd; color: #1565c0; }
+    .si-green  { background: #e8f5e9; color: #2e7d32; }
+    .si-purple { background: #f3e5f5; color: #6a1b9a; }
+    .si-orange { background: #fff3e0; color: #e65100; }
+    .si-red    { background: #fce4ec; color: #c62828; }
+    .si-teal   { background: #e0f2f1; color: #00695c; }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    .lp-footer {
+      background: #0d1e35;
+      color: #9db8d2;
+      padding: 24px 32px 18px;
+      margin-top: auto;
+    }
+    .lp-footer-inner {
+      max-width: 1280px; margin: 0 auto;
+    }
+    .lp-footer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+    }
+    .lp-footer-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #fff;
+    }
+    .lp-footer-brand-logo {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: #fff; font-weight: 800;
+    }
+    .lp-footer-brand-text strong { display: block; font-size: 0.9rem; font-weight: 800; color: #fff; }
+    .lp-footer-brand-text strong span { color: #42a5f5; }
+    .lp-footer-brand-text small { display: block; font-size: 0.62rem; color: #90caf9; }
+
+    .lp-footer-motto {
+      font-size: 0.78rem; font-weight: 600;
+      color: #b0c8e0;
+      text-align: center;
+      flex: 1;
+    }
+    .lp-footer-motto span { color: #42a5f5; }
+
+    .lp-footer-links {
+      display: flex; gap: 20px;
+      font-size: 0.75rem;
+    }
+    .lp-footer-links a { color: #9db8d2; text-decoration: none; transition: color 0.15s; }
+    .lp-footer-links a:hover { color: #fff; }
+
+    .lp-footer-bottom {
+      text-align: center;
+      padding-top: 14px;
+      font-size: 0.72rem;
+      color: #607d8b;
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      .lp-features-inner, .lp-stats-inner { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .lp-nav { padding: 10px 16px; flex-wrap: wrap; height: auto; min-height: 64px; }
+      .lp-hero-inner { grid-template-columns: 1fr; padding: 28px 20px; }
+      .lp-hero-visual { height: 220px; }
+      .lp-features-inner { grid-template-columns: repeat(2, 1fr); padding: 0; }
+      .lp-stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .lp-footer-top { flex-direction: column; align-items: flex-start; }
+      .lp-footer-motto { text-align: left; }
+    }
+    @media (max-width: 480px) {
+      .lp-stats-inner { grid-template-columns: 1fr 1fr; }
+      .lp-hero-title { font-size: 2.4rem; }
+    }
+
+    /* Counter animation */
+    .lp-stat-val[data-target] { transition: none; }
+
+  </style>
+</head>
+<body class="lp-body">
+
+  <!-- Flash Messages -->
+  <div class="lp-flashes">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm py-2 px-3 mb-2" role="alert" style="font-size:0.88rem;">
+            <i class="bi {% if category=='success' %}bi-check-circle-fill{% elif category=='danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
   </div>
 
-  <!-- Four Core Feature Tiles (Mockup Requirement) -->
-  <div class="row g-4 mb-5">
-    <!-- Tile 1 -->
-    <div class="col-md-6 col-xl-3">
-      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #2563EB !important;">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="kpi-icon-box bg-primary-subtle text-primary">
-            <i class="bi bi-database-check"></i>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-bold">Module 01</span>
-            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Data Ingestion & Quality</h5>
-          </div>
-        </div>
-        <p class="card-text text-secondary small mb-3">
-          Ingests real and synthetic CSV, XLSX, and JSON records. Normalizes state naming, imputes missing attributes, quarantines corrupt records, and computes a 0–100 Data Quality Score.
-        </p>
-        <a href="{{ url_for('views.quality_view') }}" class="btn btn-sm btn-link text-primary text-decoration-none p-0 mt-auto fw-semibold">
-          Explore Quality Engine <i class="bi bi-arrow-right"></i>
-        </a>
+  <!-- ══ TOP NAVIGATION ══ -->
+  <nav class="lp-nav">
+    <!-- Brand -->
+    <a href="{{ url_for('views.landing') }}" class="lp-brand me-4">
+      <div class="lp-brand-logo">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI" width="22" height="22" style="filter:brightness(10);">
       </div>
-    </div>
+      <div class="lp-brand-text">
+        <strong>MPLADS <span>AI</span></strong>
+        <small>Intelligent Monitoring &amp; Risk Analytics</small>
+      </div>
+    </a>
 
-    <!-- Tile 2 -->
-    <div class="col-md-6 col-xl-3">
-      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #06B6D4 !important;">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="kpi-icon-box bg-info-subtle text-info">
-            <i class="bi bi-cpu"></i>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-bold">Module 02</span>
-            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Multi-Model ML Suite</h5>
-          </div>
-        </div>
-        <p class="card-text text-secondary small mb-3">
-          Combines unsupervised Isolation Forest and One-Class SVM with a supervised Random Forest classifier. Evaluates Precision, Recall, and F1 across an 80/20 holdout test split.
-        </p>
-        <a href="{{ url_for('views.ml_detection') }}" class="btn btn-sm btn-link text-info text-decoration-none p-0 mt-auto fw-semibold">
-          View ML Benchmarks <i class="bi bi-arrow-right"></i>
-        </a>
+    <div class="lp-menu" id="landingMenu">
+      <button class="lp-menu-toggle" id="landingMenuToggle" type="button"
+              aria-label="Open account menu" aria-controls="landingMenuItems" aria-expanded="false">
+        <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+      </button>
+      <div class="lp-menu-items" id="landingMenuItems" hidden>
+        <a href="{{ url_for('auth.register') }}"><i class="bi bi-person-plus"></i> User Registration</a>
+        <a href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right"></i> User Login</a>
+        <a href="{{ url_for('auth.admin_login') }}"><i class="bi bi-shield-lock"></i> Admin Login</a>
       </div>
     </div>
+  </nav>
 
-    <!-- Tile 3 -->
-    <div class="col-md-6 col-xl-3">
-      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #F59E0B !important;">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="kpi-icon-box bg-warning-subtle text-warning-emphasis">
-            <i class="bi bi-shield-slash"></i>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-bold">Module 03</span>
-            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Explainable Risk Scoring</h5>
-          </div>
-        </div>
-        <p class="card-text text-secondary small mb-3">
-          Synthesizes continuous 0–100 Risk Scores bucketed into Low, Medium, High, and Critical. Generates transparent, plain-language root cause explanations for every flagged project.
-        </p>
-        <a href="{{ url_for('views.risk_list') }}" class="btn btn-sm btn-link text-warning-emphasis text-decoration-none p-0 mt-auto fw-semibold">
-          Inspect Risk Register <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-    </div>
 
-    <!-- Tile 4 -->
-    <div class="col-md-6 col-xl-3">
-      <div class="card h-100 border-0 shadow-sm rounded-3 p-3 bg-white" style="border-top: 4px solid #10B981 !important;">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <div class="kpi-icon-box bg-success-subtle text-success">
-            <i class="bi bi-pie-chart"></i>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-bold">Module 04</span>
-            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">Power BI & PDF Audit</h5>
-          </div>
+  <!-- ══ HERO SECTION ══ -->
+  <section class="lp-hero">
+    <div class="lp-hero-inner">
+      <!-- Left copy -->
+      <div class="lp-hero-copy">
+        <div class="lp-gov-badge">
+          <i class="bi bi-flag-fill" style="color:#ff9800;"></i>
+          Government of India
         </div>
-        <p class="card-text text-secondary small mb-3">
-          Exports standardized UTF-8 CSV datasets for direct Power BI Desktop ingestion, embeds live analytical dashboards, and compiles comprehensive PDF audit dossiers via ReportLab.
+        <h1 class="lp-hero-title">MPLADS <span>AI</span></h1>
+        <p class="lp-hero-subtitle">Intelligent Monitoring &amp; Risk Analytics for MPLADS Scheme</p>
+        <p class="lp-hero-desc">
+          An AI-powered system to detect anomalies, fraud and inefficiencies
+          in MPLADS implementation. Ensuring transparency, accountability
+          and better governance.
         </p>
-        <a href="{{ url_for('views.powerbi_view') }}" class="btn btn-sm btn-link text-success text-decoration-none p-0 mt-auto fw-semibold">
-          View BI & Reports <i class="bi bi-arrow-right"></i>
-        </a>
+        <div class="lp-hero-btns">
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('views.dashboard') }}" class="btn-hero-login">
+              <i class="bi bi-speedometer2"></i> Go to Dashboard
+            </a>
+          {% endif %}
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Implementation Pipeline Architecture Diagram -->
-  <div class="card border shadow-sm p-4 bg-white mb-4">
-    <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-diagram-3 me-2 text-primary"></i> End-to-End System Audit Pipeline</h5>
-    <div class="row g-3 text-center">
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-file-earmark-spreadsheet fs-3 text-primary mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">1. Ingestion</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">CSV / XLSX / JSON</small>
-        </div>
-      </div>
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-filter-square fs-3 text-info mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">2. Cleaning</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">Imputation & Quality</small>
-        </div>
-      </div>
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-calculator fs-3 text-success mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">3. Features</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">Gaps & Overruns</small>
-        </div>
-      </div>
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-cpu fs-3 text-warning mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">4. ML & Rules</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">IF + SVM + RF</small>
-        </div>
-      </div>
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-speedometer fs-3 text-danger mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">5. Risk Score</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">0-100 Composite</small>
-        </div>
-      </div>
-      <div class="col-md-2 col-6">
-        <div class="p-3 rounded-3 bg-light border">
-          <i class="bi bi-bar-chart-line fs-3 text-primary mb-2"></i>
-          <h6 class="fw-bold mb-1" style="font-size: 0.85rem;">6. Power BI</h6>
-          <small class="text-muted" style="font-size: 0.72rem;">CSV & PDF Reports</small>
+      <!-- Right image -->
+      <div class="lp-hero-visual">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Parliament_of_India_in_New_Delhi_01.jpg/1920px-Parliament_of_India_in_New_Delhi_01.jpg"
+          alt="Parliament House, New Delhi"
+          loading="eager"
+        >
+        <div class="lp-hero-visual-overlay"></div>
+        <div class="lp-hero-quote">
+          "Better Monitoring<br>for a Stronger<br><span>Tomorrow"</span>
         </div>
       </div>
     </div>
-  </div>
-</div>
-{% endblock %}
+  </section>
+
+
+  <!-- ══ FEATURES STRIP ══ -->
+  <section class="lp-features">
+    <div class="lp-features-inner">
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-blue">
+          <i class="bi bi-search"></i>
+        </div>
+        <div class="lp-feat-title">Anomaly Detection</div>
+        <div class="lp-feat-desc">Identify unusual patterns and irregularities</div>
+      </div>
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-green">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="lp-feat-title">Fraud Analytics</div>
+        <div class="lp-feat-desc">Detect potential fraud and misuse of funds</div>
+      </div>
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-purple">
+          <i class="bi bi-bar-chart-line"></i>
+        </div>
+        <div class="lp-feat-title">Smart Monitoring</div>
+        <div class="lp-feat-desc">Real-time project tracking and analysis</div>
+      </div>
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-orange">
+          <i class="bi bi-cpu"></i>
+        </div>
+        <div class="lp-feat-title">AI &amp; Machine Learning</div>
+        <div class="lp-feat-desc">Advanced models for accurate risk assessment</div>
+      </div>
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-teal">
+          <i class="bi bi-geo-alt"></i>
+        </div>
+        <div class="lp-feat-title">Regional Analysis</div>
+        <div class="lp-feat-desc">State, district and constituency level insights</div>
+      </div>
+
+      <div class="lp-feat">
+        <div class="lp-feat-icon fi-red">
+          <i class="bi bi-clipboard2-check"></i>
+        </div>
+        <div class="lp-feat-title">Better Governance</div>
+        <div class="lp-feat-desc">Transparent, accountable and efficient implementation</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══ STATS STRIP ══ -->
+  <section class="lp-stats">
+    <div class="lp-stats-inner">
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-blue"><i class="bi bi-folder2-open"></i></div>
+        <div>
+          <div class="lp-stat-val" data-target="12450">0</div>
+          <div class="lp-stat-label">Total Projects</div>
+        </div>
+      </div>
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-green"><i class="bi bi-currency-rupee"></i></div>
+        <div>
+          <div class="lp-stat-val" id="funds-stat">₹ 850 Cr</div>
+          <div class="lp-stat-label">Total Funds</div>
+        </div>
+      </div>
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-purple"><i class="bi bi-check2-all"></i></div>
+        <div>
+          <div class="lp-stat-val" data-target="8920">0</div>
+          <div class="lp-stat-label">Completed Projects</div>
+        </div>
+      </div>
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-orange"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div class="lp-stat-val" data-target="1240">0</div>
+          <div class="lp-stat-label">Pending Projects</div>
+        </div>
+      </div>
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-red"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+          <div class="lp-stat-val" data-target="726">0</div>
+          <div class="lp-stat-label">Delayed Projects</div>
+        </div>
+      </div>
+
+      <div class="lp-stat">
+        <div class="lp-stat-icon si-teal"><i class="bi bi-shield-exclamation"></i></div>
+        <div>
+          <div class="lp-stat-val" data-target="384">0</div>
+          <div class="lp-stat-label">High-Risk Projects</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="lp-footer">
+    <div class="lp-footer-inner">
+      <div class="lp-footer-top">
+        <!-- Brand -->
+        <a href="{{ url_for('views.landing') }}" class="lp-footer-brand">
+          <div class="lp-footer-brand-logo">
+            <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI" width="18" height="18" style="filter:brightness(10);">
+          </div>
+          <div class="lp-footer-brand-text">
+            <strong>MPLADS <span>AI</span></strong>
+            <small>Intelligent Monitoring &amp; Risk Analytics</small>
+          </div>
+        </a>
+
+        <!-- Motto -->
+        <div class="lp-footer-motto">
+          <span>"Transparency</span> &nbsp;|&nbsp; <span>Accountability</span> &nbsp;|&nbsp; <span style="color:#42a5f5;">Better Governance"</span>
+        </div>
+
+        <!-- Quick links -->
+        <div class="lp-footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms &amp; Conditions</a>
+          <a href="#">Contact Us</a>
+        </div>
+      </div>
+
+      <div class="lp-footer-bottom">
+        &copy; 2025 MPLADS AI. All rights reserved. &nbsp;|&nbsp; Government of India
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Counter animation -->
+  <script>
+    (function () {
+      const menu = document.getElementById('landingMenu');
+      const menuToggle = document.getElementById('landingMenuToggle');
+      const menuItems = document.getElementById('landingMenuItems');
+      if (menu && menuToggle && menuItems) {
+        const closeMenu = () => {
+          menuItems.hidden = true;
+          menuToggle.setAttribute('aria-expanded', 'false');
+        };
+
+        menuToggle.addEventListener('click', () => {
+          const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+          menuItems.hidden = isOpen;
+          menuToggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+        document.addEventListener('click', (event) => {
+          if (!menu.contains(event.target)) closeMenu();
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            closeMenu();
+            menuToggle.focus();
+          }
+        });
+      }
+
+      function animateCounters() {
+        const els = document.querySelectorAll('.lp-stat-val[data-target]');
+        els.forEach(el => {
+          const target = parseInt(el.dataset.target, 10);
+          const duration = 1800;
+          const step = 16;
+          const increment = target / (duration / step);
+          let current = 0;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              current = target;
+              clearInterval(timer);
+            }
+            el.textContent = Math.floor(current).toLocaleString('en-IN');
+          }, step);
+        });
+      }
+
+      // Use IntersectionObserver to start when stats are visible
+      const statsSection = document.querySelector('.lp-stats');
+      if (statsSection) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            animateCounters();
+            observer.disconnect();
+          }
+        }, { threshold: 0.2 });
+        observer.observe(statsSection);
+      }
+    })();
+  </script>
+</body>
+</html>

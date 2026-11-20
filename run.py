@@ -16,7 +16,6 @@ app = create_app()
 if __name__ == "__main__":
     print("=" * 70)
     print("  MPLADS AI - Data Anomaly and Fraud Risk Detection System")
-    print("  Academic Prototype (B.Tech CSE Data Science)")
     print("  Server starting on: http://127.0.0.1:5000")
     print("=" * 70)
     app.run(host="127.0.0.1", port=5000, debug=True)

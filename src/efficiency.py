@@ -36,14 +36,16 @@ def analyze_efficiency(df: pd.DataFrame) -> Dict[str, Any]:
     max_delay = int(delays.max()) if len(delays) > 0 else 0
     
     # Planned vs Actual duration for completed works
-    completed_df = df[df["status"].str.lower() == "completed"]
-    if len(completed_df) > 0:
-        avg_planned_duration = round(float(completed_df["planned_duration_days"].mean()), 1)
-        avg_actual_duration = round(float(completed_df["actual_duration_days"].mean()), 1)
+    p_dur = df.get("planned_duration_days", pd.Series(180, index=df.index))
+    a_dur = df.get("actual_duration_days", p_dur)
+    completed_mask = df["status"].str.lower() == "completed"
+    if completed_mask.sum() > 0:
+        avg_planned_duration = round(float(p_dur[completed_mask].mean()), 1)
+        avg_actual_duration = round(float(a_dur[completed_mask].mean()), 1)
         avg_duration_variance = round(avg_actual_duration - avg_planned_duration, 1)
     else:
-        avg_planned_duration = round(float(df["planned_duration_days"].mean()), 1)
-        avg_actual_duration = round(float(df["actual_duration_days"].mean()), 1)
+        avg_planned_duration = round(float(p_dur.mean()), 1) if len(p_dur) > 0 else 180.0
+        avg_actual_duration = round(float(a_dur.mean()), 1) if len(a_dur) > 0 else 180.0
         avg_duration_variance = 0.0
 
     # 3. Delay by State

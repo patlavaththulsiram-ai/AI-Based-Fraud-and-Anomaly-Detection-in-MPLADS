@@ -1,13 +1,70 @@
-import os
-from pathlib import Path
 
+import os
+import urllib.parse
+from pathlib import Path
+from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 
+load_dotenv(BASE_DIR / ".env")
+
+
+def get_database_uri():
+    # 1. Use an explicitly provided database URL first
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+
+    if database_url:
+        return database_url
+
+    # 2. Select database backend
+    db_type = os.environ.get("DB_TYPE", "sqlserver").strip().lower()
+
+    # 3. SQLite for local development or fallback
+    if db_type == "sqlite":
+        return f"sqlite:///{BASE_DIR / 'mplads_audit.db'}"
+
+    # 4. SQL Server as the primary database
+    if db_type != "sqlserver":
+        raise RuntimeError(
+            f"Unsupported DB_TYPE: {db_type}. "
+            "Use 'sqlserver' or 'sqlite'."
+        )
+
+    server = os.environ.get("SQL_SERVER_HOST", "localhost")
+    database = os.environ.get("SQL_SERVER_DB", "MPLADS_AI_DB")
+
+    preferred_driver = "ODBC Driver 18 for SQL Server"
+
+    try:
+        import pyodbc
+
+        available_drivers = [
+            driver for driver in pyodbc.drivers()
+            if "SQL Server" in driver
+        ]
+
+        if preferred_driver not in available_drivers and available_drivers:
+            preferred_driver = available_drivers[0]
+
+    except Exception:
+        pass
+
+    driver_part = (
+        f"Driver={{{preferred_driver}}};"
+        f"Server={server};"
+        f"Database={database};"
+        "Trusted_Connection=yes;"
+        "TrustServerCertificate=yes;"
+    )
+
+    encoded = urllib.parse.quote_plus(driver_part)
+
+    return f"mssql+pyodbc:///?odbc_connect={encoded}"
+
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "mplads-ai-sentinel-secret-key-2026-audit")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'mplads_audit.db'}")
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+
+    SQLALCHEMY_DATABASE_URI = get_database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
     # Storage Directories
     DATA_RAW_DIR = BASE_DIR / "data" / "raw"
     DATA_SYNTHETIC_DIR = BASE_DIR / "data" / "synthetic"
@@ -19,13 +76,13 @@ class Config:
     CACHE_DIR = BASE_DIR / "data" / "processed" / "cache"
 
     # Upload constraints
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls", "json"}
 
     # Random reproducibility
     RANDOM_STATE = 42
 
-    # Default Risk Weights (sum to 1.0)
+    # Default Risk Weights
     WEIGHT_ISOLATION_FOREST = 0.25
     WEIGHT_ONE_CLASS_SVM = 0.20
     WEIGHT_RANDOM_FOREST = 0.35
@@ -38,13 +95,6 @@ class Config:
         "HIGH": (60, 79),
         "CRITICAL": (80, 100)
     }
-
-    # Power BI Configuration
-    # Fallback to an explanatory dashboard view or user-provided workspace report
-    POWERBI_URL = os.environ.get(
-        "POWERBI_URL",
-        "https://app.powerbi.com/view?r=eyJrIjoiMDY4ZDFiYzEtYTU2MS00OGFkLWE5YjktYTM4NzAxZjE0MDlkIiwidCI6IjY2ZWYzOTc2LTMzMTQtNDBiZS04Y2E4LWQxODJkMjIzODlmNyJ9"
-    )
 
     # Canonical Column Names
     CANONICAL_COLUMNS = [
@@ -69,7 +119,7 @@ class Config:
         "longitude"
     ]
 
-    # Flexible Mapping from Real MPLADS/Government Portals to Canonical Schema
+    # Flexible Mapping from Government Portals
     COLUMN_ALIASES = {
         "work_id": ["work_id", "workid", "project_id", "projectid", "id", "work_code", "scheme_code"],
         "mp_name": ["mp_name", "mp", "member_of_parliament", "honble_mp", "name_of_mp", "parliamentarian"],
@@ -91,6 +141,14 @@ class Config:
         "latitude": ["latitude", "lat", "geo_lat", "location_lat"],
         "longitude": ["longitude", "long", "lng", "geo_lon", "location_long"]
     }
+
+
+# Verify required secret key
+if not Config.SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is not configured."
+    )
+
 
 # Ensure all vital project directories exist
 for folder in [

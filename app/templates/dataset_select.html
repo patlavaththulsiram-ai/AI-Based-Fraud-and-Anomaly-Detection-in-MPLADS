@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% set active_page = "dataset_select" %}
+
+{% block title %}Select Monitored Dataset - MPLADS AI{% endblock %}
+
+{% block content %}
+<style>
+  .ds-card {
+    border-radius: 14px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    background: #ffffff;
+  }
+  .ds-card:hover {
+    border-color: #1976d2;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.12);
+  }
+  .ds-card.selected {
+    border-color: #1565c0;
+    background: #f4f8fe;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.2);
+  }
+  .ds-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+  .stat-pill {
+    background: #edf4fc;
+    color: #1565c0;
+    font-weight: 600;
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+</style>
+
+<div class="container-fluid py-2">
+  <!-- Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-3 border-bottom gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h3 class="fw-bold text-dark mb-0">Saved Datasets Selection</h3>
+        <span class="badge bg-primary-subtle text-primary border">Session Workspace</span>
+      </div>
+      <p class="text-muted small mb-0">
+        Select an authorized dataset to populate KPIs, anomaly detections, risk scoring, and official audit reports. Data across datasets is strictly partitioned.
+      </p>
+    </div>
+    {% if current_user.is_admin() %}
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.upload') }}" class="btn btn-outline-primary">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Upload New Dataset
+      </a>
+      <a href="{{ url_for('views.dataset_management') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-folder2-open me-1"></i> Dataset Management
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Disclaimer Alert -->
+  <div class="alert alert-info border shadow-sm py-2 px-3 mb-4 rounded-3 d-flex align-items-center gap-2" style="font-size: 0.85rem;">
+    <i class="bi bi-shield-check text-primary fs-5"></i>
+    <div>
+      <strong>Strict Data Isolation Active:</strong> All visualizations, rule triggers, ML inferences, and exported reports reflect only the selected Dataset ID.
+    </div>
+  </div>
+
+  <!-- Selection Form -->
+  <form method="POST" action="{{ url_for('views.select_dataset') }}" id="datasetForm">
+    <div class="row g-3 mb-4">
+      {% for ds in datasets %}
+      <div class="col-lg-6">
+        <label class="w-100 mb-0">
+          <input type="radio" name="dataset_id" value="{{ ds.dataset_id }}" class="d-none ds-radio" {% if session.get('dataset_id') == ds.dataset_id or loop.first %}checked{% endif %}>
+          <div class="card ds-card p-3 p-md-4 h-100 {% if session.get('dataset_id') == ds.dataset_id or loop.first %}selected{% endif %}">
+            <div class="d-flex align-items-start gap-3">
+              <div class="ds-icon flex-shrink-0">
+                <i class="bi bi-database-fill"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="badge bg-secondary-subtle text-secondary font-monospace">{{ ds.dataset_id }}</span>
+                  {% if session.get('dataset_id') == ds.dataset_id %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-check-circle-fill me-1"></i> Currently Active
+                  </span>
+                  {% else %}
+                  <span class="badge bg-light text-muted border">Ready</span>
+                  {% endif %}
+                </div>
+                <h5 class="fw-bold text-dark mb-1">{{ ds.name }}</h5>
+                <p class="text-secondary small mb-3" style="line-height: 1.45;">
+                  {{ ds.description or 'Official verified MPLADS expenditure and physical milestone tracking dataset.' }}
+                </p>
+
+                <!-- Metadata Badges -->
+                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                  <span class="stat-pill"><i class="bi bi-kanban me-1"></i> {{ ds.record_count or 0 }} Projects</span>
+                  <span class="stat-pill"><i class="bi bi-filetype-csv me-1"></i> {{ ds.data_source or 'Audited' }}</span>
+                  <span class="stat-pill text-secondary bg-light"><i class="bi bi-person me-1"></i> {{ ds.uploaded_by or 'Admin' }}</span>
+                  <span class="stat-pill text-secondary bg-light"><i class="bi bi-calendar3 me-1"></i> {{ ds.created_at.strftime('%d-%b-%Y') if ds.created_at else 'Recent' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Enter Workspace Action -->
+    <div class="card border shadow-sm p-4 bg-white rounded-4 text-center">
+      <h5 class="fw-bold mb-1 text-dark">Confirm Dataset Selection</h5>
+      <p class="text-muted small mb-3">Click Enter to load the selected dataset into the monitoring and analytics dashboards.</p>
+      <div class="d-flex justify-content-center gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 py-2 fw-bold shadow-sm">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Enter
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Dynamic selection highlight
+  document.querySelectorAll('.ds-radio').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.ds-card').forEach(c => c.classList.remove('selected'));
+      if (this.checked) {
+        this.closest('label').querySelector('.ds-card').classList.add('selected');
+      }
+    });
+  });
+</script>
+{% endblock %}

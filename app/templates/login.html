@@ -1,64 +1,179 @@
 {% extends "base.html" %}
 {% set active_page = "login" %}
 
-{% block title %}Sign In - MPLADS AI Monitoring System{% endblock %}
+{% block title %}User Sign In - MPLADS AI Monitoring System{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-5">
-      <div class="card border shadow-sm rounded-4 p-4 bg-white">
-        <div class="text-center mb-4">
-          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="MPLADS AI Logo" width="56" height="56" class="mb-2">
-          <h4 class="fw-bold text-dark mb-1">Auditor Sign In</h4>
-          <p class="text-muted small mb-0">MPLADS AI Anomaly & Fraud Risk Detection Portal</p>
-        </div>
+<style>
+  body {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8edf8 100%);
+    min-height: 100vh;
+  }
+  .auth-card {
+    max-width: 440px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(15,32,68,0.12);
+    border: 1px solid rgba(21,101,192,0.1);
+  }
+  .goi-icon-circle {
+    width: 64px;
+    height: 64px;
+    background: #0F2044;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px auto;
+  }
+  .goi-icon-circle i {
+    color: #fff;
+    font-size: 1.75rem;
+  }
+  .auth-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0F2044;
+    margin-bottom: 4px;
+  }
+  .auth-subtitle {
+    font-size: 0.72rem;
+    color: #6c757d;
+    max-width: 300px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+  .form-control, .input-group-text {
+    border-radius: 8px !important;
+  }
+  .btn-login {
+    background: #1565C0;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.65rem;
+    letter-spacing: 0.01em;
+    transition: background 0.2s;
+  }
+  .btn-login:hover {
+    background: #0F2044;
+  }
+  .toggle-password {
+    cursor: pointer;
+    background: #f8f9fa;
+    border-left: 0;
+    border-radius: 0 8px 8px 0 !important;
+  }
+  .toggle-password:hover {
+    background: #e9ecef;
+  }
+  a.forgot-link {
+    font-size: 0.82rem;
+    color: #1565C0;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  a.forgot-link:hover { text-decoration: underline; }
+  .user-demo-box {
+    background: #f8faff;
+    border: 1px solid #dce8ff;
+    border-radius: 10px;
+    font-size: 0.8rem;
+  }
+</style>
 
-        <form method="POST" action="{{ url_for('auth.login') }}">
-          <div class="mb-3">
-            <label for="username" class="form-label small fw-semibold text-secondary">Username or Official Email</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
-              <input type="text" class="form-control" id="username" name="username" placeholder="e.g. admin or analyst@mplads-ai.gov.in" required autofocus>
-            </div>
-          </div>
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 60px); padding: 2rem 1rem;">
+  <div class="auth-card card bg-white p-4 p-md-5">
 
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label for="password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
-            </div>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
-              <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-            </div>
-          </div>
+    <!-- GOI Branding -->
+    <div class="text-center mb-4">
+      <div class="goi-icon-circle">
+        <i class="bi bi-bank2"></i>
+      </div>
+      <div class="auth-title">MPLADS AI</div>
+      <div class="auth-subtitle mb-2">Ministry of Statistics and Programme Implementation, Government of India</div>
+      <h5 class="fw-bold text-dark mb-0">User Sign In</h5>
+      <p class="text-muted small mt-1 mb-0">Access project monitoring, analytics, and risk registers</p>
+    </div>
 
-          <div class="form-check mb-4">
-            <input class="form-check-input" type="checkbox" id="remember" name="remember">
-            <label class="form-check-label small text-secondary" for="remember">
-              Remember my session
-            </label>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm mb-3">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Audit Console
-          </button>
-        </form>
-
-        <div class="p-3 rounded-3 bg-light border mb-3">
-          <div class="small fw-bold text-secondary mb-2"><i class="bi bi-info-circle me-1"></i> Quick Demo Credentials:</div>
-          <div class="d-flex flex-column gap-1" style="font-size: 0.78rem;">
-            <div><span class="badge bg-danger-subtle text-danger border">Admin</span> <code>admin</code> / <code>admin123</code> (Full calibration & triage)</div>
-            <div><span class="badge bg-primary-subtle text-primary border">Analyst</span> <code>analyst</code> / <code>analyst123</code> (Audit analysis & alerts)</div>
-            <div><span class="badge bg-secondary-subtle text-secondary border">Viewer</span> <code>viewer</code> / <code>viewer123</code> (Read-only dashboard access)</div>
-          </div>
-        </div>
-
-        <div class="text-center small text-secondary">
-          Don't have an auditor account? <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none fw-semibold">Register here</a>
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <!-- Username or Email -->
+      <div class="mb-3">
+        <label for="username" class="form-label small fw-semibold text-secondary mb-1">Username or Email</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+          <input type="text" class="form-control" id="username" name="username"
+                 placeholder="Enter username or email" required autofocus>
         </div>
       </div>
+
+      <!-- Password -->
+      <div class="mb-2">
+        <label for="password" class="form-label small fw-semibold text-secondary mb-1">Password</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control" id="password" name="password"
+                 placeholder="Enter password" required>
+          <span class="input-group-text toggle-password" id="togglePassword" title="Show/hide password">
+            <i class="bi bi-eye" id="eyeIcon"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Remember me + Forgot Password -->
+      <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <div class="form-check mb-0">
+          <input class="form-check-input" type="checkbox" id="remember" name="remember">
+          <label class="form-check-label small text-secondary" for="remember">Remember me</label>
+        </div>
+        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot Password?</a>
+      </div>
+
+      <!-- Login Button -->
+      <button type="submit" class="btn btn-login btn-primary w-100 mb-3 text-white">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+      </button>
+    </form>
+
+    <!-- User Demo Hint -->
+    <div class="user-demo-box p-3 mb-3 text-muted">
+      <div class="fw-semibold text-dark mb-1"><i class="bi bi-info-circle text-primary me-1"></i> Demo User Account:</div>
+      <div>Username: <code>user</code> &nbsp;|&nbsp; Password: <code>user123</code></div>
     </div>
+
+    <!-- Register Link -->
+    <div class="text-center small text-secondary">
+      Don’t have an account?
+      <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none fw-semibold">Register</a>
+    </div>
+
+    <!-- Separate Admin Link -->
+    <div class="text-center mt-3 pt-3 border-top">
+      <a href="{{ url_for('auth.admin_login') }}" class="text-secondary text-decoration-none small">
+        <i class="bi bi-shield-lock me-1"></i> Authorized Admin Portal
+      </a>
+    </div>
+
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const toggleBtn = document.getElementById('togglePassword');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function () {
+      const pwd = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+      } else {
+        pwd.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+      }
+    });
+  }
+</script>
 {% endblock %}

@@ -45,27 +45,27 @@
         </div>
 
         <p class="text-secondary small mb-3">
-          Calculated via multi-component synthesis: Isolation Forest, One-Class SVM, Random Forest, and Policy Rules Engine.
+          Calculated from the stored machine-learning and policy-rule risk components.
         </p>
 
         <!-- Model Sub-Scores Grid -->
         <div class="row g-2 text-center border-top pt-3">
           <div class="col-4">
             <div class="p-2 border rounded-3 bg-light">
-              <span class="text-muted" style="font-size: 0.7rem;">Isolation Forest</span>
-              <div class="fw-bold text-dark">{{ p.if_anomaly_score }}</div>
+              <span class="text-muted" style="font-size: 0.7rem;">ML Anomaly</span>
+              <div class="fw-bold text-dark">{{ p.ml_anomaly_score }}</div>
             </div>
           </div>
           <div class="col-4">
             <div class="p-2 border rounded-3 bg-light">
-              <span class="text-muted" style="font-size: 0.7rem;">One-Class SVM</span>
-              <div class="fw-bold text-dark">{{ p.svm_anomaly_score }}</div>
+              <span class="text-muted" style="font-size: 0.7rem;">Financial Anomaly</span>
+              <div class="fw-bold text-dark">{{ p.financial_anomaly_score }}</div>
             </div>
           </div>
           <div class="col-4">
             <div class="p-2 border rounded-3 bg-light">
-              <span class="text-muted" style="font-size: 0.7rem;">Random Forest</span>
-              <div class="fw-bold text-dark">{{ p.rf_anomaly_prob }}%</div>
+              <span class="text-muted" style="font-size: 0.7rem;">Delay Anomaly</span>
+              <div class="fw-bold text-dark">{{ p.delay_anomaly_score }}</div>
             </div>
           </div>
         </div>
@@ -81,10 +81,10 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-currency-rupee text-success me-1"></i> Financial Outlay Risk</span>
-            <span>{{ p.financial_risk }} / 100</span>
+            <span>{{ p.financial_anomaly_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.financial_risk > 60 %}bg-danger{% elif p.financial_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.financial_risk }}%;"></div>
+            <div class="progress-bar {% if p.financial_anomaly_score > 60 %}bg-danger{% elif p.financial_anomaly_score > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.financial_anomaly_score }}%;"></div>
           </div>
         </div>
 
@@ -92,10 +92,10 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-clock-history text-danger me-1"></i> Schedule & Delay Risk</span>
-            <span>{{ p.delay_risk }} / 100</span>
+            <span>{{ p.delay_anomaly_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.delay_risk > 60 %}bg-danger{% elif p.delay_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.delay_risk }}%;"></div>
+            <div class="progress-bar {% if p.delay_anomaly_score > 60 %}bg-danger{% elif p.delay_anomaly_score > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.delay_anomaly_score }}%;"></div>
           </div>
         </div>
 
@@ -103,10 +103,10 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-cpu text-primary me-1"></i> Unsupervised Statistical Anomaly Risk</span>
-            <span>{{ p.anomaly_risk }} / 100</span>
+            <span>{{ p.ml_anomaly_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.anomaly_risk > 60 %}bg-danger{% elif p.anomaly_risk > 30 %}bg-warning{% else %}bg-primary{% endif %}" style="width: {{ p.anomaly_risk }}%;"></div>
+            <div class="progress-bar {% if p.ml_anomaly_score > 60 %}bg-danger{% elif p.ml_anomaly_score > 30 %}bg-warning{% else %}bg-primary{% endif %}" style="width: {{ p.ml_anomaly_score }}%;"></div>
           </div>
         </div>
 
@@ -114,10 +114,10 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-copy text-info me-1"></i> Tender Redundancy / Duplicate Risk</span>
-            <span>{{ p.duplicate_risk }} / 100</span>
+            <span>{{ p.duplicate_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.duplicate_risk > 60 %}bg-danger{% elif p.duplicate_risk > 30 %}bg-warning{% else %}bg-info{% endif %}" style="width: {{ p.duplicate_risk }}%;"></div>
+            <div class="progress-bar {% if p.duplicate_score > 60 %}bg-danger{% elif p.duplicate_score > 30 %}bg-warning{% else %}bg-info{% endif %}" style="width: {{ p.duplicate_score }}%;"></div>
           </div>
         </div>
 
@@ -125,10 +125,10 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-check-circle text-warning-emphasis me-1"></i> Physical Progress vs Disbursal Risk</span>
-            <span>{{ p.progress_risk }} / 100</span>
+            <span>{{ p.progress_mismatch_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.progress_risk > 60 %}bg-danger{% elif p.progress_risk > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.progress_risk }}%;"></div>
+            <div class="progress-bar {% if p.progress_mismatch_score > 60 %}bg-danger{% elif p.progress_mismatch_score > 30 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ p.progress_mismatch_score }}%;"></div>
           </div>
         </div>
 
@@ -136,10 +136,10 @@
         <div class="mb-2">
           <div class="d-flex justify-content-between small fw-semibold mb-1">
             <span><i class="bi bi-shield-check text-secondary me-1"></i> Data Quality & Record Integrity Risk</span>
-            <span>{{ p.data_quality_risk }} / 100</span>
+            <span>{{ p.quality_defect_score }} / 100</span>
           </div>
           <div class="progress" style="height: 8px;">
-            <div class="progress-bar {% if p.data_quality_risk > 60 %}bg-danger{% else %}bg-secondary{% endif %}" style="width: {{ p.data_quality_risk }}%;"></div>
+            <div class="progress-bar {% if p.quality_defect_score > 60 %}bg-danger{% else %}bg-secondary{% endif %}" style="width: {{ p.quality_defect_score }}%;"></div>
           </div>
         </div>
       </div>
@@ -159,7 +159,7 @@
     </div>
 
     <div class="list-group list-group-flush">
-      {% for reason in reasons %}
+      {% for reason in risk_drivers %}
       <div class="list-group-item px-0 py-2 d-flex align-items-start gap-2 border-0">
         <i class="bi bi-exclamation-triangle-fill text-danger mt-1"></i>
         <span class="text-dark small">{{ reason }}</span>

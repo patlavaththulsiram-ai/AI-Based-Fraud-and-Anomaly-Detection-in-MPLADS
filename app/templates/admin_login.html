@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% set active_page = "admin_login" %}
+
+{% block title %}Authorized Admin Login - MPLADS AI Monitoring System{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background: radial-gradient(circle at 50% 30%, #0d2137 0%, #081321 100%);
+    min-height: 100vh;
+  }
+  .admin-auth-card {
+    max-width: 440px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #0f2238;
+    color: #e3edf7;
+  }
+  .admin-badge-circle {
+    width: 68px;
+    height: 68px;
+    background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px auto;
+    box-shadow: 0 0 20px rgba(198, 40, 40, 0.4);
+  }
+  .admin-badge-circle i {
+    color: #fff;
+    font-size: 1.85rem;
+  }
+  .admin-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .admin-subtitle {
+    font-size: 0.72rem;
+    color: #90caf9;
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+  .admin-input-group .form-control {
+    background: #142c48 !important;
+    border: 1px solid #234872 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+  }
+  .admin-input-group .form-control:focus {
+    border-color: #42a5f5 !important;
+    box-shadow: 0 0 0 0.2rem rgba(66, 165, 245, 0.25) !important;
+  }
+  .admin-input-group .input-group-text {
+    background: #0a1929 !important;
+    border: 1px solid #234872 !important;
+    color: #90caf9 !important;
+    border-radius: 8px !important;
+  }
+  .btn-admin-login {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.7rem;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(183, 28, 28, 0.35);
+  }
+  .btn-admin-login:hover {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    box-shadow: 0 6px 20px rgba(183, 28, 28, 0.5);
+    color: #fff;
+  }
+  .admin-security-note {
+    background: rgba(13, 71, 161, 0.25);
+    border: 1px solid rgba(66, 165, 245, 0.25);
+    border-radius: 8px;
+    font-size: 0.74rem;
+    color: #b0bec5;
+    line-height: 1.4;
+  }
+</style>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 60px); padding: 2rem 1rem;">
+  <div class="admin-auth-card card p-4 p-md-5">
+
+    <!-- Admin Badge & Header -->
+    <div class="text-center mb-4">
+      <div class="admin-badge-circle">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <div class="admin-title">MPLADS AI</div>
+      <div class="admin-subtitle mb-2">Ministry of Statistics and Programme Implementation, Government of India</div>
+      <h5 class="fw-bold text-white mb-0">Authorized Admin Terminal</h5>
+      <p class="text-secondary small mt-1 mb-0">Privileged Data Ingestion &amp; System Calibration</p>
+    </div>
+
+    <!-- Security Advisory -->
+    <div class="admin-security-note p-2 mb-4 text-center">
+      <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+      <strong>Restricted Terminal:</strong> Single authorized administrator account only. All terminal actions are cryptographically logged to the central audit register.
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.admin_login') }}">
+      <!-- Admin Username -->
+      <div class="mb-3 admin-input-group">
+        <label for="username" class="form-label small fw-semibold text-light mb-1">Admin Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person-fill-lock"></i></span>
+          <input type="text" class="form-control" id="username" name="username"
+                 placeholder="Enter authorized admin username" required autofocus>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4 admin-input-group">
+        <label for="password" class="form-label small fw-semibold text-light mb-1">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+          <input type="password" class="form-control" id="password" name="password"
+                 placeholder="Enter admin password" required>
+        </div>
+      </div>
+
+      <!-- Admin Login Button -->
+      <button type="submit" class="btn btn-admin-login w-100 mb-3">
+        <i class="bi bi-shield-check me-1"></i> Admin Login
+      </button>
+    </form>
+
+    <!-- Admin Demo Hint -->
+    <div class="p-2 mb-3 text-center small rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #90caf9;">
+      <i class="bi bi-info-circle me-1"></i> Authorized Admin: <code>admin</code> &nbsp;|&nbsp; <code>admin123</code>
+    </div>
+
+    <!-- Back to Standard Login -->
+    <div class="text-center pt-2">
+      <a href="{{ url_for('auth.login') }}" class="text-secondary text-decoration-none small">
+        <i class="bi bi-arrow-left me-1"></i> Return to Standard User Login
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

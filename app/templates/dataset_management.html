@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% set active_page = "dataset_management" %}
+
+{% block title %}Dataset Management - MPLADS AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-3 border-bottom gap-3">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Dataset Management</h3>
+      <p class="text-muted small mb-0">Authorized Admin module for managing uploaded audits, validating integrity, and controlling active datasets.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('views.upload') }}" class="btn btn-primary">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Ingest New Dataset
+      </a>
+      <a href="{{ url_for('views.select_dataset') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-repeat me-1"></i> Switch Active Dataset
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small fw-semibold">Total Datasets</div>
+            <div class="fs-3 fw-bold text-dark">{{ datasets|length }}</div>
+          </div>
+          <div class="rounded-3 bg-primary-subtle text-primary p-3 fs-4">
+            <i class="bi bi-folder-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small fw-semibold">Current Active Dataset</div>
+            <div class="fs-5 fw-bold text-primary font-monospace">{{ session.get('dataset_id', 'None') }}</div>
+          </div>
+          <div class="rounded-3 bg-success-subtle text-success p-3 fs-4">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border shadow-sm rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small fw-semibold">SQL Server Partitioning</div>
+            <div class="fs-5 fw-bold text-dark">MPLADS_AI_DB</div>
+          </div>
+          <div class="rounded-3 bg-info-subtle text-info p-3 fs-4">
+            <i class="bi bi-database-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datasets Table -->
+  <div class="card border shadow-sm rounded-4 bg-white overflow-hidden">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <h5 class="fw-bold mb-0 text-dark">Registered Datasets</h5>
+      <span class="badge bg-secondary-subtle text-secondary">{{ datasets|length }} Entries in SQL Server</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Dataset ID</th>
+            <th>Name &amp; Description</th>
+            <th>Records</th>
+            <th>Source</th>
+            <th>Uploaded By</th>
+            <th>Created Date</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ds in datasets %}
+          <tr {% if session.get('dataset_id') == ds.dataset_id %}class="table-primary-subtle"{% endif %}>
+            <td>
+              <span class="badge bg-secondary font-monospace">{{ ds.dataset_id }}</span>
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ ds.name }}</div>
+              <small class="text-muted text-truncate d-inline-block" style="max-width: 320px;">
+                {{ ds.description }}
+              </small>
+            </td>
+            <td>
+              <span class="badge bg-info-subtle text-info border">{{ ds.record_count }} projects</span>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ ds.data_source }}</span>
+            </td>
+            <td>{{ ds.uploaded_by }}</td>
+            <td class="small text-muted">{{ ds.created_at.strftime('%Y-%m-%d %H:%M') if ds.created_at else '-' }}</td>
+            <td>
+              {% if session.get('dataset_id') == ds.dataset_id %}
+              <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Active</span>
+              {% else %}
+              <span class="badge bg-secondary">Available</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <form method="POST" action="{{ url_for('views.select_dataset') }}" class="d-inline">
+                  <input type="hidden" name="dataset_id" value="{{ ds.dataset_id }}">
+                  <button type="submit" class="btn btn-outline-primary" title="Switch to this dataset">
+                    <i class="bi bi-box-arrow-in-right"></i> Enter
+                  </button>
+                </form>
+                {% if ds.dataset_id != 'DS-2024-NAT-001' %}
+                <form method="POST" action="{{ url_for('views.delete_dataset', dataset_id=ds.dataset_id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this dataset and all associated analysis from SQL Server?');">
+                  <button type="submit" class="btn btn-outline-danger" title="Delete Dataset">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

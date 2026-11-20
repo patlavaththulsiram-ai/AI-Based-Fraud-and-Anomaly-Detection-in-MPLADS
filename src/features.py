@@ -52,7 +52,13 @@ def check_round_number(val: float) -> int:
         return 1
     return 0
 
-def engineer_features(df: pd.DataFrame, scaler: StandardScaler = None, fit_scaler: bool = True) -> Tuple[pd.DataFrame, np.ndarray, StandardScaler]:
+def engineer_features(
+    df: pd.DataFrame,
+    scaler: StandardScaler = None,
+    fit_scaler: bool = True,
+    persist_scaler: bool = True,
+    reference_df: pd.DataFrame = None
+) -> Tuple[pd.DataFrame, np.ndarray, StandardScaler]:
     """
     Extracts all engineered features from preprocessed MPLADS records.
     
@@ -60,6 +66,7 @@ def engineer_features(df: pd.DataFrame, scaler: StandardScaler = None, fit_scale
         (featured_df, scaled_feature_matrix, fitted_scaler)
     """
     feat_df = df.copy()
+    statistics_df = reference_df if reference_df is not None else feat_df
     ref_date = datetime(2026, 3, 1)
 
     # 1. Financial Ratios
@@ -127,8 +134,9 @@ def engineer_features(df: pd.DataFrame, scaler: StandardScaler = None, fit_scale
 
     # 4. Frequency & Categorical Encodings
     # Agency work count
-    agency_counts = feat_df["implementing_agency"].value_counts().to_dict()
-    feat_df["agency_work_count"] = feat_df["implementing_agency"].map(agency_counts).fillna(1)
+    agency_counts = statistics_df["implementing_agency"].value_counts().to_dict()
+    unseen_agency_count = 0 if reference_df is not None else 1
+    feat_df["agency_work_count"] = feat_df["implementing_agency"].map(agency_counts).fillna(unseen_agency_count)
 
     # Status encoding: Completed=1, Ongoing=2, Delayed=3, Pending=4, other=0
     status_map = {
@@ -145,14 +153,25 @@ def engineer_features(df: pd.DataFrame, scaler: StandardScaler = None, fit_scale
     feat_df["category_encoded"] = feat_df["work_category"].str.lower().map(cat_map).fillna(0).astype(int)
 
     # Expenditure Z-Score within Category
-    cat_stats = feat_df.groupby("work_category")["expenditure"].agg(["mean", "std"]).to_dict("index")
+    cat_stats = statistics_df.groupby("work_category")["expenditure"].agg(["mean", "std"]).to_dict("index")
     zscores = []
     for idx, row in feat_df.iterrows():
         cat = row.get("work_category", "")
         exp = row.get("expenditure", 0.0)
-        stats = cat_stats.get(cat, {"mean": 20.0, "std": 10.0})
+        stats = cat_stats.get(cat)
+        if stats is None:
+            if reference_df is not None:
+                zscores.append(np.nan)
+                continue
+            stats = {"mean": 20.0, "std": 10.0}
         mean = stats["mean"]
-        std = stats["std"] if (stats["std"] is not None and stats["std"] > 0) else 1.0
+        std = stats["std"]
+        if reference_df is not None and (
+            pd.isna(mean) or pd.isna(std) or std <= 0 or pd.isna(exp)
+        ):
+            zscores.append(np.nan)
+            continue
+        std = std if (std is not None and std > 0) else 1.0
         zscores.append(round((exp - mean) / std, 4))
     feat_df["expenditure_zscore_within_category"] = zscores
 
@@ -165,9 +184,9 @@ def engineer_features(df: pd.DataFrame, scaler: StandardScaler = None, fit_scale
     if fit_scaler or scaler is None:
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_raw)
-        # Save scaler to models_store
-        scaler_path = Config.MODELS_STORE_DIR / "feature_scaler.joblib"
-        joblib.dump(scaler, scaler_path)
+        if persist_scaler:
+            scaler_path = Config.MODELS_STORE_DIR / "feature_scaler.joblib"
+            joblib.dump(scaler, scaler_path)
     else:
         X_scaled = scaler.transform(X_raw)
 

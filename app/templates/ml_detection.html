@@ -9,7 +9,7 @@
   <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
     <div>
       <h3 class="fw-bold text-dark mb-1">Machine Learning Detection Suite & Model Comparison</h3>
-      <p class="text-muted small mb-0">Multi-model benchmark: Unsupervised Isolation Forest, One-Class SVM, and Supervised Random Forest</p>
+      <p class="text-muted small mb-0">Dataset-scoped anomaly detection with Isolation Forest, One-Class SVM, and Random Forest evaluation when verified labels are available</p>
     </div>
     <div class="d-flex gap-2">
       <a href="{{ url_for('views.duplicates_view') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
@@ -21,8 +21,9 @@
   {% if not has_data %}
   <div class="card border shadow-sm rounded-4 text-center p-5 bg-white">
     <h5>No model evaluation available.</h5>
+    <p class="text-muted small mb-0">Select a dataset with processed project records to view its anomaly evaluation.</p>
     <div class="mt-3">
-      <a href="{{ url_for('views.load_demo_data') }}" class="btn btn-primary btn-sm">Load Demo Dataset</a>
+      <a href="{{ url_for('views.select_dataset') }}" class="btn btn-primary btn-sm">Select Dataset</a>
     </div>
   </div>
   {% else %}
@@ -31,23 +32,26 @@
   <div class="alert alert-info border shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
     <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
     <div>
-      <div class="fw-bold">Benchmark Evaluation Protocol</div>
+      <div class="fw-bold">Model Evaluation Protocol</div>
       <div class="small text-secondary">
-        {{ eval_note | default('Evaluation metrics are measured against injected ground-truth anomaly labels on the 20% holdout test partition.') }}
-        Hyperparameters tuned via stratified <code>GridSearchCV</code>.
+        {{ eval_note }}
+        Detected records are potential anomalies requiring verification, not confirmed fraud.
       </div>
     </div>
   </div>
 
   <!-- Model Comparison Table -->
   <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
-    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-table text-primary me-2"></i> Algorithmic Performance Comparison (20% Holdout Test Set)</h5>
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-table text-primary me-2"></i> Algorithmic Performance Comparison</h5>
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
             <th>Model Algorithm</th>
             <th>Learning Paradigm</th>
+            <th>Records Evaluated</th>
+            <th>Anomalies Detected</th>
+            <th>Anomaly %</th>
             <th>Precision</th>
             <th>Recall</th>
             <th>F1-Score</th>
@@ -58,23 +62,21 @@
         <tbody>
           {% for m in comparison_table %}
           <tr>
-            <td class="fw-bold text-dark">{{ m.model }}</td>
+            <td class="fw-bold text-dark">
+              {{ m.model }}
+              <div class="small text-muted fw-normal">{{ m.status }}</div>
+            </td>
             <td><span class="badge bg-light text-dark border">{{ m.category }}</span></td>
+            <td>{{ m.records_evaluated }}</td>
+            <td>{{ m.anomalies_detected }}</td>
+            <td>{{ m.anomaly_pct }}</td>
             <td><span class="badge bg-success-subtle text-success border">{{ m.precision }}</span></td>
             <td><span class="badge bg-info-subtle text-info border">{{ m.recall }}</span></td>
             <td>
               <span class="badge bg-primary fs-6">{{ m.f1_score }}</span>
             </td>
             <td>{{ m.accuracy }}</td>
-            <td class="small text-secondary">
-              {% if m.model == 'Isolation Forest' %}
-              Unsupervised tree partitioning; rapid outlier isolation
-              {% elif m.model == 'One-Class SVM' %}
-              Non-linear RBF kernel boundary mapping for complex distributions
-              {% else %}
-              Supervised ensemble learning with balanced class weights
-              {% endif %}
-            </td>
+            <td class="small text-secondary">{{ m.key_advantage }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -82,13 +84,56 @@
     </div>
   </div>
 
-  <!-- Confusion Matrices & Feature Importance Grid -->
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line text-primary me-2"></i> Unsupervised Model Detection Comparison</h5>
+    {% if chart_data %}
+    <div style="height: 320px;">
+      <canvas id="anomalyComparisonChart" role="img" aria-label="Chart comparing anomaly counts and percentages for Isolation Forest and One-Class SVM"></canvas>
+    </div>
+    {% else %}
+    <div class="text-muted small">A comparison chart is unavailable because the models could not evaluate this dataset.</div>
+    {% endif %}
+  </div>
+
+  <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-flag text-primary me-2"></i> Flagged Records</h5>
+    <div class="small text-secondary mb-3">Each row shows an unsupervised model flag. Anomaly scores are model-specific and should not be compared across algorithms. Recorded risk reasons appear only when present; they are not model-specific explanations.</div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Project ID</th>
+            <th>Project Name / Description</th>
+            <th>Anomaly Score</th>
+            <th>Flagged By</th>
+            <th>Risk Level</th>
+            <th>Recorded Risk Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in flagged_records %}
+          <tr>
+            <td><code>{{ record.project_id or "—" }}</code></td>
+            <td>{{ record.project_name or "—" }}</td>
+            <td>{{ "%.4f"|format(record.anomaly_score) }}</td>
+            <td>{{ record.model }}</td>
+            <td>{{ record.risk_level or "—" }}</td>
+            <td>{{ record.reason or "—" }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No records were flagged, or model results are unavailable.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Confusion Matrix & Feature Importance -->
+  {% if metrics.random_forest %}
   <div class="row g-4 mb-4">
-    <!-- Confusion Matrix Cards -->
     <div class="col-lg-6">
       <div class="card border shadow-sm rounded-4 p-4 bg-white h-100">
         <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid-3x3 text-primary me-2"></i> Random Forest Confusion Matrix</h5>
-        {% if metrics.random_forest %}
         <div class="row text-center g-2 my-2">
           <div class="col-6">
             <div class="p-3 border rounded-3 bg-light">
@@ -115,6 +160,7 @@
             </div>
           </div>
         </div>
+        {% if metrics.random_forest.roc_auc is defined and metrics.random_forest.roc_auc is not none %}
         <div class="mt-3 text-muted small">
           ROC-AUC Score: <span class="badge bg-light text-dark border">{{ metrics.random_forest.roc_auc }}</span>
         </div>
@@ -122,10 +168,10 @@
       </div>
     </div>
 
-    <!-- Feature Importances -->
     <div class="col-lg-6">
       <div class="card border shadow-sm rounded-4 p-4 bg-white h-100">
         <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line text-primary me-2"></i> Random Forest Feature Importances</h5>
+        {% if feature_importances %}
         <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
           <table class="table table-sm table-hover align-middle mb-0">
             <thead class="table-light">
@@ -142,7 +188,7 @@
                 <td>{{ (imp * 100) | round(2) }}%</td>
                 <td style="width: 160px;">
                   <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-primary" style="width: {{ imp * 250 }}%;"></div>
+                    <div class="progress-bar bg-primary" style="width: {{ (imp * 100) | round(2) }}%;"></div>
                   </div>
                 </td>
               </tr>
@@ -150,9 +196,81 @@
             </tbody>
           </table>
         </div>
+        {% else %}
+        <div class="alert alert-secondary small mb-0">Feature importances are unavailable because the Random Forest model has no fitted feature set.</div>
+        {% endif %}
       </div>
     </div>
   </div>
+  {% else %}
+  <div class="alert alert-secondary border shadow-sm rounded-4 p-3 mb-4">
+    <div class="fw-bold">Random Forest evaluation is unavailable</div>
+    <div class="small">{{ random_forest_status }} A trained supervised model, confusion matrix, feature importances, and classification metrics require verified ground-truth labels with enough examples from both classes for a train/test split.</div>
+  </div>
+  {% endif %}
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ super() }}
+{% if has_data and chart_data %}
+<script>
+  const anomalyChartData = {{ chart_data|tojson }};
+  const anomalyChart = document.getElementById("anomalyComparisonChart");
+  if (anomalyChart && typeof Chart !== "undefined") {
+    new Chart(anomalyChart, {
+      type: "bar",
+      data: {
+        labels: anomalyChartData.map((item) => item.model),
+        datasets: [
+          {
+            type: "bar",
+            label: "Anomalies detected (records)",
+            data: anomalyChartData.map((item) => item.anomaly_count),
+            backgroundColor: "rgba(13, 110, 253, 0.65)",
+            borderColor: "rgb(13, 110, 253)",
+            borderWidth: 1,
+            yAxisID: "count"
+          },
+          {
+            type: "line",
+            label: "Anomaly percentage",
+            data: anomalyChartData.map((item) => item.anomaly_percentage),
+            borderColor: "rgb(220, 53, 69)",
+            backgroundColor: "rgba(220, 53, 69, 0.15)",
+            pointRadius: 5,
+            tension: 0.2,
+            yAxisID: "percentage"
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (context) => context.dataset.yAxisID === "percentage"
+                ? `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`
+                : `${context.dataset.label}: ${context.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          count: { beginAtZero: true, title: { display: true, text: "Anomaly count" } },
+          percentage: {
+            beginAtZero: true,
+            position: "right",
+            title: { display: true, text: "Anomaly percentage" },
+            ticks: { callback: (value) => `${value}%` },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endif %}
 {% endblock %}
