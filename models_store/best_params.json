@@ -1,29 +1,36 @@
 {
   "isolation_forest": {
-    "contamination": 0.08,
-    "n_estimators": 100
+    "n_estimators": 100,
+    "contamination": 0.1365079365079365,
+    "max_samples": "auto",
+    "n_jobs": 1
   },
   "one_class_svm": {
+    "kernel": "rbf",
+    "nu": 0.05,
     "gamma": "scale",
-    "nu": 0.1
+    "cache_size": 100
   },
   "random_forest": {
-    "max_depth": 5,
-    "min_samples_split": 2,
-    "n_estimators": 100
+    "n_estimators": 100,
+    "max_depth": 10,
+    "min_samples_split": 5,
+    "min_samples_leaf": 2,
+    "class_weight": "balanced",
+    "n_jobs": 1
   },
   "feature_importances": {
-    "progress_vs_spend_gap": 0.396,
-    "cost_overrun_pct": 0.1721,
-    "sanction_utilization": 0.1714,
-    "delay_days": 0.062,
-    "actual_duration_days": 0.0611,
-    "planned_duration_days": 0.0326,
-    "expenditure": 0.0306,
-    "completion_status_encoded": 0.0305,
-    "expenditure_zscore_within_category": 0.0262,
-    "category_encoded": 0.0121,
-    "agency_work_count": 0.0036,
-    "round_number_flag": 0.0018
+    "progress_vs_spend_gap": 0.3352,
+    "sanction_utilization": 0.1758,
+    "cost_overrun_pct": 0.1743,
+    "actual_duration_days": 0.0869,
+    "delay_days": 0.0793,
+    "expenditure": 0.0393,
+    "expenditure_zscore_within_category": 0.0355,
+    "completion_status_encoded": 0.0234,
+    "planned_duration_days": 0.0223,
+    "category_encoded": 0.0211,
+    "agency_work_count": 0.0046,
+    "round_number_flag": 0.0024
   }
 }
